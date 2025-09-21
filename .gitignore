@@ -1,0 +1,23 @@
+# .env 파일 - 민감 정보는 절대로 Git에 올리지 않습니다.
+.env
+
+# DB 데이터 - 로컬 환경마다 다르고 용량이 큽니다.
+/data/
+
+# IDE 설정 파일
+.idea/
+*.iml
+*~
+*.swp
+
+# 빌드 결과물 및 캐시
+/backend/build/
+/backend/.gradle/
+build/
+.gradle/
+
+# 로그 파일
+*.log
+
+# macOS 시스템 파일
+.DS_Store
