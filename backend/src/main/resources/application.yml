@@ -1,0 +1,43 @@
+spring:
+  # 여러 데이터 소스 설정을 위한 프로파일 그룹
+  profiles:
+    group:
+      "default": "auth, domain" # 기본적으로 auth, domain 프로파일을 함께 사용
+
+---
+# Auth DB (MariaDB) 설정
+spring:
+  config:
+    activate:
+      on-profile: "auth"
+  datasource:
+    url: ${SPRING_DATASOURCE_AUTH_URL} # docker-compose.yml의 환경 변수
+    username: ${SPRING_DATASOURCE_AUTH_USERNAME}
+    password: ${SPRING_DATASOURCE_AUTH_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update # 개발 초기에는 update로 설정하여 엔티티 변경 시 자동 반영
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+        dialect: org.hibernate.dialect.MariaDBDialect
+
+---
+# Domain DB (PostgreSQL) 설정
+spring:
+  config:
+    activate:
+      on-profile: "domain"
+  datasource:
+    url: ${SPRING_DATASOURCE_DOMAIN_URL} # docker-compose.yml의 환경 변수
+    username: ${SPRING_DATASOURCE_DOMAIN_USERNAME}
+    password: ${SPRING_DATASOURCE_DOMAIN_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+        dialect: org.hibernate.dialect.PostgreSQLDialect # PostGIS를 사용하기 위해 그냥 PostgreSQLDialect를 사용
