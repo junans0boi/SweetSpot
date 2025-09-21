@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: sweetspot-backend
+    restart: always
+    depends_on:
+      - auth-db
+      - domain-db
+    environment:
+      - SPRING_DATASOURCE_AUTH_URL=jdbc:mariadb://auth-db:3306/sweetspot_auth
+      - SPRING_DATASOURCE_AUTH_USERNAME=your_auth_user
+      - SPRING_DATASOURCE_AUTH_PASSWORD=your_auth_password
+      - SPRING_DATASOURCE_DOMAIN_URL=jdbc:postgresql://domain-db:5432/sweetspot_domain
+      - SPRING_DATASOURCE_DOMAIN_USERNAME=your_domain_user
+      - SPRING_DATASOURCE_DOMAIN_PASSWORD=your_domain_password
+    networks:
+      - sweetspot-network
+
+  auth-db:
+    image: mariadb:10.8
+    container_name: sweetspot-auth-db
+    restart: always
+    environment:
+      - MARIADB_DATABASE=sweetspot_auth
+      - MARIADB_USER=your_auth_user
+      - MARIADB_PASSWORD=your_auth_password
+      - MARIADB_ROOT_PASSWORD=your_root_password
+      - TZ=Asia/Seoul
+    volumes:
+      - ./data/mariadb_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - sweetspot-network
+
+  domain-db:
+    image: postgis/postgis:15-3.4
+    container_name: sweetspot-domain-db
+    restart: always
+    environment:
+      - POSTGRES_DB=sweetspot_domain
+      - POSTGRES_USER=your_domain_user
+      - POSTGRES_PASSWORD=your_domain_password
+      - TZ=Asia/Seoul
+    volumes:
+      - ./data/postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - sweetspot-network
+
+  proxy:
+    image: nginx:stable-alpine
+    container_name: sweetspot-proxy
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./proxy/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+    networks:
+      - sweetspot-network
+
+networks:
+  sweetspot-network:
+    driver: bridge
