@@ -1,6 +1,6 @@
 package com.hollywood.sweetspot.config.security;
 
-import com.hollywood.sweetspot.model.Role;
+import com.hollywood.sweetspot.user.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
