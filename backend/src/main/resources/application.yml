@@ -1,43 +1,56 @@
 spring:
-  # 여러 데이터 소스 설정을 위한 프로파일 그룹
-  profiles:
-    group:
-      "default": "auth, domain" # 기본적으로 auth, domain 프로파일을 함께 사용
+  jpa:
+    hibernate:
+      ddl-auto: update # 공통 ddl-auto 설정은 유지합니다.
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
 
----
-# Auth DB (MariaDB) 설정
-spring:
-  config:
-    activate:
-      on-profile: "auth"
-  datasource:
-    url: ${SPRING_DATASOURCE_AUTH_URL} # docker-compose.yml의 환경 변수
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD} # Google 앱 비밀번호
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# 🔻 데이터베이스별 설정을 명확하게 분리합니다.
+datasources:
+  auth:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: ${SPRING_DATASOURCE_AUTH_URL}
     username: ${SPRING_DATASOURCE_AUTH_USERNAME}
     password: ${SPRING_DATASOURCE_AUTH_PASSWORD}
-    driver-class-name: org.mariadb.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update # 개발 초기에는 update로 설정하여 엔티티 변경 시 자동 반영
-    properties:
-      hibernate:
-        default_batch_fetch_size: 100
-        dialect: org.hibernate.dialect.MariaDBDialect
-
----
-# Domain DB (PostgreSQL) 설정
-spring:
-  config:
-    activate:
-      on-profile: "domain"
-  datasource:
-    url: ${SPRING_DATASOURCE_DOMAIN_URL} # docker-compose.yml의 환경 변수
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.MariaDBDialect
+  domain:
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_DOMAIN_URL}
     username: ${SPRING_DATASOURCE_DOMAIN_USERNAME}
     password: ${SPRING_DATASOURCE_DOMAIN_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        default_batch_fetch_size: 100
-        dialect: org.hibernate.dialect.PostgreSQLDialect # PostGIS를 사용하기 위해 그냥 PostgreSQLDialect를 사용
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# JWT 및 OAuth 설정
+jwt:
+  secret: ${JWT_SECRET}
+
+security:
+  oauth2:
+    client:
+      registration:
+        google:
+          client-id: ${GOOGLE_CLIENT_ID}
+          client-secret: ${GOOGLE_CLIENT_SECRET}
+          scope:
+            - email
+            - profile
+

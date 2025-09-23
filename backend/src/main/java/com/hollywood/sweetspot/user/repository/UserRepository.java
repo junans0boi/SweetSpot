@@ -1,6 +1,6 @@
-package com.hollywood.sweetspot.user;
+package com.hollywood.sweetspot.user.repository;
 
-import com.hollywood.sweetspot.user.User;
+import com.hollywood.sweetspot.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

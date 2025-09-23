@@ -1,13 +1,13 @@
-package com.hollywood.sweetspot.user;
+package com.hollywood.sweetspot.user.service;
 
-import com.hollywood.sweetspot.config.security.JwtTokenProvider;
-import com.hollywood.sweetspot.user.SignInRequest;
-import com.hollywood.sweetspot.user.SignUpRequest;
-import com.hollywood.sweetspot.user.TokenResponse;
-import com.hollywood.sweetspot.user.Provider;
-import com.hollywood.sweetspot.user.Role;
-import com.hollywood.sweetspot.user.User;
-import com.hollywood.sweetspot.user.UserRepository;
+import com.hollywood.sweetspot.global.security.JwtTokenProvider;
+import com.hollywood.sweetspot.user.dto.SignInRequest;
+import com.hollywood.sweetspot.user.dto.SignUpRequest;
+import com.hollywood.sweetspot.user.dto.TokenResponse;
+import com.hollywood.sweetspot.user.model.Provider;
+import com.hollywood.sweetspot.user.model.Role;
+import com.hollywood.sweetspot.user.model.User;
+import com.hollywood.sweetspot.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
