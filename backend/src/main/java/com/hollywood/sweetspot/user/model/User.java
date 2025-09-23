@@ -1,4 +1,4 @@
-package com.hollywood.sweetspot.user;
+package com.hollywood.sweetspot.user.model;
 
 import jakarta.persistence.*;
 import lombok.Builder;

@@ -1,9 +1,9 @@
-package com.hollywood.sweetspot.user;
+package com.hollywood.sweetspot.user.controller;
 
-import com.hollywood.sweetspot.user.SignInRequest;
-import com.hollywood.sweetspot.user.SignUpRequest;
-import com.hollywood.sweetspot.user.TokenResponse;
-import com.hollywood.sweetspot.user.AuthService;
+import com.hollywood.sweetspot.user.service.AuthService;
+import com.hollywood.sweetspot.user.dto.SignInRequest;
+import com.hollywood.sweetspot.user.dto.SignUpRequest;
+import com.hollywood.sweetspot.user.dto.TokenResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

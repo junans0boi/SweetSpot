@@ -1,4 +1,4 @@
-package com.hollywood.sweetspot.user;
+package com.hollywood.sweetspot.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
