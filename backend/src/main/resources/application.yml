@@ -1,0 +1,56 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update # 공통 ddl-auto 설정은 유지합니다.
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD} # Google 앱 비밀번호
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# 🔻 데이터베이스별 설정을 명확하게 분리합니다.
+datasources:
+  auth:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: ${SPRING_DATASOURCE_AUTH_URL}
+    username: ${SPRING_DATASOURCE_AUTH_USERNAME}
+    password: ${SPRING_DATASOURCE_AUTH_PASSWORD}
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.MariaDBDialect
+  domain:
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_DOMAIN_URL}
+    username: ${SPRING_DATASOURCE_DOMAIN_USERNAME}
+    password: ${SPRING_DATASOURCE_DOMAIN_PASSWORD}
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# JWT 및 OAuth 설정
+jwt:
+  secret: ${JWT_SECRET}
+
+security:
+  oauth2:
+    client:
+      registration:
+        google:
+          client-id: ${GOOGLE_CLIENT_ID}
+          client-secret: ${GOOGLE_CLIENT_SECRET}
+          scope:
+            - email
+            - profile
+
