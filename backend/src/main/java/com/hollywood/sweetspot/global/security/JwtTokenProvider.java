@@ -8,11 +8,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    @Value("${JWT_SECRET}")
+    @Value("${jwt.secret}") // 🔻 application.yml 경로와 일치시킴
     private String jwtSecret;
 
     private SecretKey secretKey;
@@ -36,12 +39,10 @@ public class JwtTokenProvider {
         secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    // Access Token 생성
     public String createAccessToken(Authentication authentication) {
         return createToken(authentication, ACCESS_TOKEN_VALIDITY_MS);
     }
 
-    // Refresh Token 생성
     public String createRefreshToken(Authentication authentication) {
         return createToken(authentication, REFRESH_TOKEN_VALIDITY_MS);
     }
@@ -50,12 +51,14 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityMs);
 
-        String authorities = authentication.getAuthorities().stream()
-                .map(grantedAuthority -> grantedAuthority.getAuthority())
-                .collect(Collectors.joining(","));
+        // 🔻 수정된 부분: 권한을 String이 아닌 List<String>으로 추출
+        List<String> authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
 
         return Jwts.builder()
                 .subject(authentication.getName())
+                // 🔻 수정된 부분: "roles" claim에 List<String>을 직접 저장
                 .claim("roles", authorities)
                 .issuedAt(now)
                 .expiration(validity)
@@ -63,23 +66,23 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // 토큰에서 인증 정보 조회
     public Authentication getAuthentication(String token) {
         Claims claims = parseClaims(token);
-        List<SimpleGrantedAuthority> authorities = ((List<?>) claims.get("roles", List.class)).stream()
-                .map(authority -> new SimpleGrantedAuthority((String) authority))
+
+        // 🔻 수정된 부분: 토큰에서 "roles"를 List<String>으로 직접 가져옴
+        List<String> roles = claims.get("roles", List.class);
+        Collection<? extends GrantedAuthority> authorities = roles.stream()
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
         return new UsernamePasswordAuthenticationToken(claims.getSubject(), null, authorities);
     }
 
-    // 토큰 유효성 검증
     public boolean validateToken(String token) {
         try {
             Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
             return true;
         } catch (Exception e) {
-            // MalformedJwtException, ExpiredJwtException, etc.
             return false;
         }
     }
@@ -92,3 +95,4 @@ public class JwtTokenProvider {
                 .getPayload();
     }
 }
+
