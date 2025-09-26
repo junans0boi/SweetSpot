@@ -1,5 +1,7 @@
 package com.hollywood.sweetspot.config;
 
+import com.hollywood.sweetspot.global.security.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,14 +11,17 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor // 🔻 final 필드를 주입받기 위해 추가
 public class SecurityConfig {
 
-    // 🔻 바로 이 부분입니다!
-    // PasswordEncoder를 Bean으로 등록합니다. BCrypt 암호화 방식을 사용합니다.
+    // 🔻 우리가 만든 JWT 인증 필터를 주입받습니다.
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -33,15 +38,16 @@ public class SecurityConfig {
 
                 // HTTP 요청 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        // 🔻 회원가입/로그인 API는 인증 없이 접근 허용하도록 미리 추가했습니다.
                         .requestMatchers(
                                 new AntPathRequestMatcher("/api/auth/**"),
-                                new AntPathRequestMatcher("/api/test") // 테스트용 API도 허용 유지
+                                new AntPathRequestMatcher("/api/test")
                         ).permitAll()
-                        // 그 외 모든 요청은 인증 필요
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated())
+
+                // 🔻 바로 이 부분입니다! 🔻
+                // 우리가 만든 JWT 인증 필터를 UsernamePasswordAuthenticationFilter 앞에 추가합니다.
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 }
-
