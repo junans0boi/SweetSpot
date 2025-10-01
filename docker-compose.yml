@@ -18,6 +18,8 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
     networks:
       - sweetspot-network
 
@@ -62,11 +64,14 @@ services:
       - "80:80"
     volumes:
       - ./proxy/nginx.conf:/etc/nginx/nginx.conf
+      # 🔻 수정된 부분 🔻
+      # Nginx 로그에서 확인된 실제 경로로 frontend 폴더를 연결합니다.
+      - ./frontend:/etc/nginx/html
     depends_on:
       - backend
     networks:
       - sweetspot-network
-  
+
 networks:
   sweetspot-network:
     driver: bridge
