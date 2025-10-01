@@ -18,7 +18,19 @@ spring:
           starttls:
             enable: true
 
-# 🔻 데이터베이스별 설정을 명확하게 분리합니다.
+  # 🔻 Google OAuth2 클라이언트 등록 정보를 spring 블록 안으로 이동(들여쓰기)합니다. 🔻
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+
+# 데이터베이스별 설정을 명확하게 분리합니다.
 datasources:
   auth:
     driver-class-name: org.mariadb.jdbc.Driver
@@ -29,6 +41,8 @@ datasources:
       properties:
         hibernate:
           dialect: org.hibernate.dialect.MariaDBDialect
+          hbm2ddl:
+            auto: update
   domain:
     driver-class-name: org.postgresql.Driver
     url: ${SPRING_DATASOURCE_DOMAIN_URL}
@@ -39,18 +53,7 @@ datasources:
         hibernate:
           dialect: org.hibernate.dialect.PostgreSQLDialect
 
-# JWT 및 OAuth 설정
+# JWT 설정
 jwt:
   secret: ${JWT_SECRET}
-
-security:
-  oauth2:
-    client:
-      registration:
-        google:
-          client-id: ${GOOGLE_CLIENT_ID}
-          client-secret: ${GOOGLE_CLIENT_SECRET}
-          scope:
-            - email
-            - profile
 

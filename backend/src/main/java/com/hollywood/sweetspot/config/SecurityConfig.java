@@ -1,6 +1,9 @@
 package com.hollywood.sweetspot.config;
 
+import com.hollywood.sweetspot.user.service.CustomOAuth2UserService;
 import com.hollywood.sweetspot.global.security.JwtAuthenticationFilter;
+import com.hollywood.sweetspot.global.security.oauth2.handler.OAuth2LoginFailureHandler;
+import com.hollywood.sweetspot.global.security.oauth2.handler.OAuth2LoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,14 +16,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor // 🔻 final 필드를 주입받기 위해 추가
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    // 🔻 우리가 만든 JWT 인증 필터를 주입받습니다.
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -30,23 +36,29 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // CSRF 보호 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
+                // 🔻 불필요한 기본 로그인 폼과 Basic Auth 비활성화 🔻
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
 
-                // 세션 관리 정책: STATELESS (JWT 사용을 위함)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // HTTP 요청 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 new AntPathRequestMatcher("/api/auth/**"),
-                                new AntPathRequestMatcher("/api/test")
+                                new AntPathRequestMatcher("/api/test"),
+                                new AntPathRequestMatcher("/oauth2/**"),
+                                new AntPathRequestMatcher("/login/oauth2/**")
                         ).permitAll()
                         .anyRequest().authenticated())
-
-                // 🔻 바로 이 부분입니다! 🔻
-                // 우리가 만든 JWT 인증 필터를 UsernamePasswordAuthenticationFilter 앞에 추가합니다.
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(a -> a
+                                .authorizationRequestRepository(new HttpSessionOAuth2AuthorizationRequestRepository())
+                        )
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler)
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                );
 
         return http.build();
     }

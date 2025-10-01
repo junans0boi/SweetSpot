@@ -4,21 +4,27 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name = "users") // 'user'는 DB 예약어인 경우가 많아 'users' 사용을 권장합니다.
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(
+                name = "user_email_provider_unique",
+                columnNames = {"email", "provider"}
+        )
+})
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     @Column
@@ -38,7 +44,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
-    private List<Role> roles = new ArrayList<>();
+    // 🔻 추가: User가 삭제될 때 연관된 roles 데이터도 함께 삭제되도록 설정합니다.
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<Role> roles;
 
     @Builder
     public User(String email, String password, String name, String pictureUrl, Provider provider, List<Role> roles) {
@@ -48,5 +56,11 @@ public class User {
         this.pictureUrl = pictureUrl;
         this.provider = provider;
         this.roles = roles;
+    }
+
+    public User update(String name, String pictureUrl) {
+        this.name = name;
+        this.pictureUrl = pictureUrl;
+        return this;
     }
 }
