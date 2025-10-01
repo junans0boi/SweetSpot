@@ -1,26 +1,20 @@
-version: '3.8'
-
 services:
   backend:
     build:
       context: ./backend
     container_name: sweetspot-backend
     restart: always
-    env_file: ./.env # .env 파일을 읽어오도록 설정
+    env_file: ./.env
     depends_on:
       - auth-db
       - domain-db
     environment:
-      # Docker 내부 서비스 이름과 .env 변수를 조합하여 URL 동적 생성
-      # Auth DB (MariaDB)
       - SPRING_DATASOURCE_AUTH_URL=jdbc:mariadb://auth-db:3306/sweetspot_auth?useUnicode=true&characterEncoding=utf8
       - SPRING_DATASOURCE_AUTH_USERNAME=${MariaDB_DB_USER}
       - SPRING_DATASOURCE_AUTH_PASSWORD=${MariaDB_DB_PASSWORD}
-      # Domain DB (PostgreSQL)
       - SPRING_DATASOURCE_DOMAIN_URL=jdbc:postgresql://domain-db:5432/sweetspot_places
       - SPRING_DATASOURCE_DOMAIN_USERNAME=${Postgre_DB_USER}
       - SPRING_DATASOURCE_DOMAIN_PASSWORD=${Postgre_DB_PASSWORD}
-      # Secrets
       - JWT_SECRET=${JWT_SECRET}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
@@ -32,7 +26,6 @@ services:
     container_name: sweetspot-auth-db
     restart: always
     environment:
-      # .env 파일의 변수를 참조하도록 수정
       - MARIADB_DATABASE=sweetspot_auth
       - MARIADB_USER=${MariaDB_DB_USER}
       - MARIADB_PASSWORD=${MariaDB_DB_PASSWORD}
@@ -50,7 +43,6 @@ services:
     container_name: sweetspot-domain-db
     restart: always
     environment:
-      # .env 파일의 변수를 참조하도록 수정
       - POSTGRES_DB=sweetspot_places
       - POSTGRES_USER=${Postgre_DB_USER}
       - POSTGRES_PASSWORD=${Postgre_DB_PASSWORD}
@@ -74,7 +66,7 @@ services:
       - backend
     networks:
       - sweetspot-network
-
+  
 networks:
   sweetspot-network:
     driver: bridge

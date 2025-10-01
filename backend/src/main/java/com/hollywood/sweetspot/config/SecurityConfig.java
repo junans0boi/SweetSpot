@@ -1,33 +1,64 @@
 package com.hollywood.sweetspot.config;
 
+import com.hollywood.sweetspot.user.service.CustomOAuth2UserService;
+import com.hollywood.sweetspot.global.security.JwtAuthenticationFilter;
+import com.hollywood.sweetspot.global.security.oauth2.handler.OAuth2LoginFailureHandler;
+import com.hollywood.sweetspot.global.security.oauth2.handler.OAuth2LoginSuccessHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // CSRF 보호 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
+                // 🔻 불필요한 기본 로그인 폼과 Basic Auth 비활성화 🔻
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
 
-                // 세션 관리 정책: STATELESS (JWT 사용을 위함)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // HTTP 요청 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        // 🔻 수정된 부분: AntPathRequestMatcher를 사용하여 명시적으로 경로 지정
-                        .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll()
-                        // 그 외 모든 요청은 인증 필요
-                        .anyRequest().authenticated());
+                        .requestMatchers(
+                                new AntPathRequestMatcher("/api/auth/**"),
+                                new AntPathRequestMatcher("/api/test"),
+                                new AntPathRequestMatcher("/oauth2/**"),
+                                new AntPathRequestMatcher("/login/oauth2/**")
+                        ).permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(a -> a
+                                .authorizationRequestRepository(new HttpSessionOAuth2AuthorizationRequestRepository())
+                        )
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler)
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                );
 
         return http.build();
     }
