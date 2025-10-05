@@ -5,9 +5,12 @@ services:
     container_name: sweetspot-backend
     restart: always
     env_file: ./.env
+    # DB 서비스들이 healthy 상태가 된 후에 백엔드를 시작합니다.
     depends_on:
-      - auth-db
-      - domain-db
+      auth-db:
+        condition: service_healthy
+      domain-db:
+        condition: service_healthy
     environment:
       - SPRING_DATASOURCE_AUTH_URL=jdbc:mariadb://auth-db:3306/sweetspot_auth?useUnicode=true&characterEncoding=utf8
       - SPRING_DATASOURCE_AUTH_USERNAME=${MariaDB_DB_USER}
@@ -20,6 +23,7 @@ services:
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - MAIL_USERNAME=${MAIL_USERNAME}
       - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - FRONT_BASE_URL=${FRONT_BASE_URL}
     networks:
       - sweetspot-network
 
@@ -37,6 +41,12 @@ services:
       - ./data/mariadb_data:/var/lib/mysql
     ports:
       - "3306:3306"
+    # DB가 준비되었는지 확인하는 healthcheck 추가
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MariaDB_DB_USER}", "-p${MariaDB_DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - sweetspot-network
 
@@ -53,6 +63,23 @@ services:
       - ./data/postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    # DB가 준비되었는지 확인하는 healthcheck 추가
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${Postgre_DB_USER} -d sweetspot_places"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sweetspot-network
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: sweetspot-frontend
+    restart: always
+    # [수정] 새로 만든 frontend/nginx.conf 파일을 컨테이너 내부에 적용합니다.
+    volumes:
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf
     networks:
       - sweetspot-network
 
@@ -61,18 +88,15 @@ services:
     container_name: sweetspot-proxy
     restart: always
     ports:
-      - "80:80"
+      - "8088:80"
     volumes:
       - ./proxy/nginx.conf:/etc/nginx/nginx.conf
-      # 🔻 수정된 부분 🔻
-      # Nginx 로그에서 확인된 실제 경로로 frontend 폴더를 연결합니다.
-      - ./frontend:/etc/nginx/html
     depends_on:
       - backend
+      - frontend
     networks:
       - sweetspot-network
 
 networks:
   sweetspot-network:
     driver: bridge
-
