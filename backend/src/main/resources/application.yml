@@ -18,7 +18,6 @@ spring:
           starttls:
             enable: true
 
-  # 🔻 Google OAuth2 클라이언트 등록 정보를 spring 블록 안으로 이동(들여쓰기)합니다. 🔻
   security:
     oauth2:
       client:
@@ -29,6 +28,7 @@ spring:
             scope:
               - email
               - profile
+            redirect-uri: "http://localhost:8088/login/oauth2/code/google"
 
 # 데이터베이스별 설정을 명확하게 분리합니다.
 datasources:
@@ -53,7 +53,10 @@ datasources:
         hibernate:
           dialect: org.hibernate.dialect.PostgreSQLDialect
 
+# [추가/확인] 프론트엔드 URL을 Spring 속성으로 정의
+front:
+  base-url: ${FRONT_BASE_URL}
+
 # JWT 설정
 jwt:
   secret: ${JWT_SECRET}
-
