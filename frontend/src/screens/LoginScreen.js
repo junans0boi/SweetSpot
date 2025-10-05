@@ -1,44 +1,105 @@
 // src/screens/LoginScreen.js
 
-import React from 'react';
-import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-// [1. 추가] AntDesign 아이콘 컴포넌트 불러오기
+import React, { useState } from 'react';
+import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
+import { useAuth } from '../contexts/AuthContext'; // [1. 추가] useAuth 훅을 불러옵니다.
+
+const BACKEND_URL = 'http://localhost:8088';
+
+WebBrowser.maybeCompleteAuthSession();
 
 const LoginScreen = ({ navigation }) => {
+    const { signIn } = useAuth(); // [2. 추가] AuthContext의 signIn 함수를 가져옵니다.
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleGoogleLogin = async () => {
+        try {
+            const redirectUri = AuthSession.makeRedirectUri({ scheme: 'exp', useProxy: true, path: 'oauth-redirect' });
+            const authUrl = `${BACKEND_URL}/oauth2/authorization/google`;
+            const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+
+            if (result.type === 'success' && result.url) {
+                const params = new URLSearchParams(result.url.split('?')[1]);
+                const accessToken = params.get('accessToken');
+                const refreshToken = params.get('refreshToken');
+
+                if (accessToken && refreshToken) {
+                    // [3. 수정] console.log, Alert, navigation 대신 signIn 함수를 호출합니다.
+                    signIn({ accessToken, refreshToken });
+                } else {
+                    Alert.alert('Google 로그인 실패', '토큰을 받아오지 못했습니다.');
+                }
+            } else if (result.type !== 'cancel') {
+                Alert.alert('Google 로그인 취소 또는 실패');
+            }
+        } catch (error) {
+            console.error('Google 로그인 오류:', error);
+            Alert.alert('Google 로그인 중 오류가 발생했습니다.');
+        }
+    };
+
+    const handleLogin = async () => {
+        if (!email || !password) {
+            Alert.alert('오류', '이메일과 비밀번호를 모두 입력해주세요.');
+            return;
+        }
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/auth/signin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            if (response.ok) {
+                const data = await response.json(); // { accessToken, refreshToken }
+                // [3. 수정] console.log, Alert, navigation 대신 signIn 함수를 호출합니다.
+                signIn(data);
+            } else {
+                const error = await response.json();
+                Alert.alert('로그인 실패', error.message || '이메일 또는 비밀번호를 확인해주세요.');
+            }
+        } catch (error) {
+            console.error('로그인 오류:', error);
+            Alert.alert('서버 에러', '서버에 연결할 수 없습니다.');
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.contentContainer}>
-                {/* 1. 상단 텍스트 영역 */}
                 <View style={styles.header}>
                     <Text style={styles.title}>어디를 가야할지 고민일때는</Text>
                     <Text style={styles.subtitle}>스윗스팟!</Text>
                 </View>
 
-                {/* 2. 이메일, 비밀번호 입력 영역 */}
                 <View style={styles.inputContainer}>
                     <Text style={styles.inputLabel}>이메일</Text>
                     <TextInput
                         style={styles.input}
                         placeholder="이메일을 입력해주세요."
                         keyboardType="email-address"
+                        value={email}
+                        onChangeText={setEmail}
+                        autoCapitalize="none"
                     />
-
                     <Text style={styles.inputLabel}>비밀번호</Text>
                     <TextInput
                         style={styles.input}
                         placeholder="영문, 숫자, 특수문자 조합 8자리 이상"
                         secureTextEntry={true}
+                        value={password}
+                        onChangeText={setPassword}
                     />
                 </View>
 
-                {/* 3. 버튼 영역 */}
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.loginButton}>
+                    <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
                         <Text style={styles.loginButtonText}>로그인</Text>
                     </TouchableOpacity>
-
                     <View style={styles.subButtonContainer}>
                         <TouchableOpacity>
                             <Text style={styles.subButtonText}>비밀번호 재설정</Text>
@@ -48,11 +109,8 @@ const LoginScreen = ({ navigation }) => {
                             <Text style={styles.subButtonText}>회원가입</Text>
                         </TouchableOpacity>
                     </View>
-
-                    {/* [2. 수정] 구글 버튼에 아이콘 추가 */}
-                    <TouchableOpacity style={styles.googleButton}>
-                        {/* 아이콘 컴포넌트 추가 */}
-                        <AntDesign name="google" size={24} color="black" style={styles.googleIcon} />
+                    <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+                        <AntDesign name="google" size={24} color="black" style={styles.googleIcon}/>
                         <Text style={styles.googleButtonText}>Google로 로그인</Text>
                     </TouchableOpacity>
                 </View>
@@ -61,7 +119,6 @@ const LoginScreen = ({ navigation }) => {
     );
 };
 
-// 스타일 시트
 const styles = StyleSheet.create({
     container: {
         flex: 1,
