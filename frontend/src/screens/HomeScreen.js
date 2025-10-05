@@ -1,21 +1,32 @@
-// src/screens/HomeScreen.js
-
 import React from 'react';
-// [1. 추가] 버튼과 스타일링을 위해 TouchableOpacity, StyleSheet를 불러옵니다.
-import { SafeAreaView, Text, TouchableOpacity, StyleSheet } from 'react-native';
-// [2. 추가] AuthContext의 signOut 함수를 사용하기 위해 useAuth를 불러옵니다.
+// 🔻 수정: View와 ScrollView를 react-native에서 불러옵니다.
+import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+// 🔻 추가: 로그아웃 기능을 위해 AuthContext를 불러옵니다.
 import { useAuth } from '../contexts/AuthContext';
 
-const HomeScreen = () => {
-    // [3. 추가] useAuth 훅을 사용해 signOut 함수를 가져옵니다.
+const MainScreen = () => {
     const { signOut } = useAuth();
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.text}>🏠 홈 화면입니다!</Text>
-            <Text style={styles.welcomeText}>로그인에 성공하셨습니다.</Text>
+            {/* 1. 지도 영역 */}
+            <View style={styles.mapArea}>
+                <Text>지도 API가 연동될 영역</Text>
+            </View>
 
-            {/* [4. 추가] 로그아웃 버튼 */}
+            {/* 2. 검색 및 필터 영역 */}
+            <View style={styles.filterArea}>
+                <Text>검색 바와 필터 버튼이 들어올 영역</Text>
+            </View>
+
+            {/* 3. 장소 목록 */}
+            <ScrollView style={styles.listArea}>
+                <Text>장소 카드 목록이 들어올 영역</Text>
+                <Text>장소 카드 목록이 들어올 영역</Text>
+                <Text>장소 카드 목록이 들어올 영역</Text>
+            </ScrollView>
+
+            {/* 4. 로그아웃 버튼 */}
             <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
                 <Text style={styles.logoutButtonText}>로그아웃</Text>
             </TouchableOpacity>
@@ -23,29 +34,44 @@ const HomeScreen = () => {
     );
 };
 
-// [5. 추가] 버튼 스타일링
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center',
+        backgroundColor: '#fff',
+    },
+    mapArea: {
+        flex: 4, // 화면의 40% 정도를 차지
+        backgroundColor: '#f0f0f0',
         justifyContent: 'center',
-        backgroundColor: '#FFFFFF',
+        alignItems: 'center',
     },
-    text: {
-        fontSize: 24,
-        fontWeight: 'bold',
+    filterArea: {
+        padding: 10,
+        backgroundColor: '#fff',
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
     },
-    welcomeText: {
-        fontSize: 18,
-        marginTop: 8,
-        color: '#757575',
+    listArea: {
+        flex: 6, // 화면의 60% 정도를 차지
+        backgroundColor: '#fff',
     },
     logoutButton: {
-        marginTop: 40,
+        position: 'absolute', // 화면 위에 버튼을 띄웁니다.
+        bottom: 40,
+        right: 20,
         backgroundColor: '#FF6347',
         paddingVertical: 12,
         paddingHorizontal: 30,
         borderRadius: 25,
+        // 그림자 효과 (iOS & Android)
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
     logoutButtonText: {
         fontSize: 16,
@@ -54,4 +80,5 @@ const styles = StyleSheet.create({
     },
 });
 
-export default HomeScreen;
+export default MainScreen;
+
