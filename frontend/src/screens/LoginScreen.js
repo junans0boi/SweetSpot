@@ -1,25 +1,24 @@
-// src/screens/LoginScreen.js
-
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
-import { useAuth } from '../contexts/AuthContext'; // [1. 추가] useAuth 훅을 불러옵니다.
-
-const BACKEND_URL = 'http://localhost:8088';
+import { useAuth } from '../contexts/AuthContext';
+import API_BASE_URL from '../config/api';
 
 WebBrowser.maybeCompleteAuthSession();
 
 const LoginScreen = ({ navigation }) => {
-    const { signIn } = useAuth(); // [2. 추가] AuthContext의 signIn 함수를 가져옵니다.
+    const { signIn } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    // 🔻 [추가] 로딩 상태를 관리할 state
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleGoogleLogin = async () => {
         try {
-            const redirectUri = AuthSession.makeRedirectUri({ scheme: 'exp', useProxy: true, path: 'oauth-redirect' });
-            const authUrl = `${BACKEND_URL}/oauth2/authorization/google`;
+            const redirectUri = AuthSession.makeRedirectUri({ scheme: 'exp', useProxy: true });
+            const authUrl = `${API_BASE_URL}/oauth2/authorization/google`;
             const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
 
             if (result.type === 'success' && result.url) {
@@ -28,13 +27,10 @@ const LoginScreen = ({ navigation }) => {
                 const refreshToken = params.get('refreshToken');
 
                 if (accessToken && refreshToken) {
-                    // [3. 수정] console.log, Alert, navigation 대신 signIn 함수를 호출합니다.
                     signIn({ accessToken, refreshToken });
                 } else {
                     Alert.alert('Google 로그인 실패', '토큰을 받아오지 못했습니다.');
                 }
-            } else if (result.type !== 'cancel') {
-                Alert.alert('Google 로그인 취소 또는 실패');
             }
         } catch (error) {
             console.error('Google 로그인 오류:', error);
@@ -47,28 +43,30 @@ const LoginScreen = ({ navigation }) => {
             Alert.alert('오류', '이메일과 비밀번호를 모두 입력해주세요.');
             return;
         }
+        setIsLoading(true); // 로딩 시작
         try {
-            const response = await fetch(`${BACKEND_URL}/api/auth/signin`, {
+            const response = await fetch(`${API_BASE_URL}/api/auth/signin`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             });
 
-            if (response.ok) {
-                const data = await response.json(); // { accessToken, refreshToken }
-                // [3. 수정] console.log, Alert, navigation 대신 signIn 함수를 호출합니다.
-                signIn(data);
-            } else {
-                const error = await response.json();
-                Alert.alert('로그인 실패', error.message || '이메일 또는 비밀번호를 확인해주세요.');
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || '로그인에 실패했습니다.');
             }
+            signIn(data); // 성공 시 AuthContext를 통해 로그인 처리
         } catch (error) {
-            console.error('로그인 오류:', error);
-            Alert.alert('서버 에러', '서버에 연결할 수 없습니다.');
+            Alert.alert('로그인 오류', error.message);
+        } finally {
+            setIsLoading(false); // 로딩 종료 (성공/실패 여부와 관계없이)
         }
     };
 
+
+
     return (
+        // ... JSX 코드는 동일 ...
         <SafeAreaView style={styles.container}>
             <View style={styles.contentContainer}>
                 <View style={styles.header}>
@@ -84,8 +82,8 @@ const LoginScreen = ({ navigation }) => {
                         keyboardType="email-address"
                         value={email}
                         onChangeText={setEmail}
-                        autoCapitalize="none"
                     />
+
                     <Text style={styles.inputLabel}>비밀번호</Text>
                     <TextInput
                         style={styles.input}
@@ -100,6 +98,7 @@ const LoginScreen = ({ navigation }) => {
                     <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
                         <Text style={styles.loginButtonText}>로그인</Text>
                     </TouchableOpacity>
+
                     <View style={styles.subButtonContainer}>
                         <TouchableOpacity>
                             <Text style={styles.subButtonText}>비밀번호 재설정</Text>
@@ -109,8 +108,9 @@ const LoginScreen = ({ navigation }) => {
                             <Text style={styles.subButtonText}>회원가입</Text>
                         </TouchableOpacity>
                     </View>
+
                     <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
-                        <AntDesign name="google" size={24} color="black" style={styles.googleIcon}/>
+                        <AntDesign name="google" size={24} color="black" style={styles.googleIcon} />
                         <Text style={styles.googleButtonText}>Google로 로그인</Text>
                     </TouchableOpacity>
                 </View>
@@ -118,7 +118,7 @@ const LoginScreen = ({ navigation }) => {
         </SafeAreaView>
     );
 };
-
+// ... (스타일 시트) ...
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -192,14 +192,12 @@ const styles = StyleSheet.create({
         borderColor: '#E0E0E0',
         paddingVertical: 16,
         borderRadius: 8,
-        // [추가] 아이콘과 텍스트를 가로로 나열하기 위해 flexDirection:'row'
         flexDirection: 'row',
-        alignItems: 'center', // 세로 중앙 정렬
-        justifyContent: 'center', // 가로 중앙 정렬
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    // [추가] 아이콘과 텍스트 사이 간격 조정을 위한 스타일
     googleIcon: {
-        marginRight: 10, // 텍스트와의 간격
+        marginRight: 10,
     },
     googleButtonText: {
         fontSize: 16,
@@ -209,3 +207,4 @@ const styles = StyleSheet.create({
 });
 
 export default LoginScreen;
+

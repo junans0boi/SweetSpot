@@ -1,37 +1,29 @@
 import React from 'react';
-import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-// 🔻 [추가] 네이버 지도 뷰 컴포넌트를 import 합니다.
-import NaverMapView from '@mj-studio/react-native-naver-map';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { NaverMapView } from '@mj-studio/react-native-naver-map'; // ✅ 수정됨
+import { useAuth } from '../contexts/AuthContext';
 
-const MainScreen = ({ navigation }) => {
-
-    const handleLogout = async () => {
-        await AsyncStorage.removeItem('userToken');
-        navigation.replace('Login');
-    };
+const MainScreen = () => {
+    const { signOut } = useAuth();
 
     return (
-        <SafeAreaView style={styles.container}>
-            {/* 🔻 [수정] 지도 영역을 NaverMapView로 교체합니다. 🔻 */}
+        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
             <NaverMapView
                 style={styles.mapArea}
-                // 초기 카메라 위치를 군포시청 근처로 설정합니다.
                 initialCamera={{
                     latitude: 37.3613,
                     longitude: 126.935,
                     zoom: 15,
                 }}
-                onInitialized={() => console.log('Naver Map Initialized!')}
+                onInitialized={() => console.log('✅ 네이버 지도 초기화되었습니다!')}
             />
 
-            {/* 2. 검색 및 필터 영역 */}
             <View style={styles.filterArea}>
-                <Text>검색 바와 필터 버튼이 들어올 영역</Text>
+                <Text>검색 바와 필터 버튼이 들어올 영역이란다</Text>
             </View>
 
-            {/* 3. 로그아웃 버튼 */}
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
                 <Text style={styles.logoutButtonText}>로그아웃</Text>
             </TouchableOpacity>
         </SafeAreaView>
@@ -39,15 +31,10 @@ const MainScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    mapArea: {
-        flex: 1, // 지도가 화면 전체를 채우도록 flex: 1로 변경
-    },
+    container: { flex: 1, backgroundColor: '#fff' },
+    mapArea: { flex: 1 },
     filterArea: {
-        position: 'absolute', // 지도의 상단 위에 겹치도록 설정
+        position: 'absolute',
         top: 60,
         left: 20,
         right: 20,
@@ -65,7 +52,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 30,
         borderRadius: 25,
-        shadowColor: "#000",
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,

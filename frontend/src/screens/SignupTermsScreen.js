@@ -1,11 +1,12 @@
 // src/screens/SignupTermsScreen.js
 
-import React, {useState, useEffect} from 'react';
-import {SafeAreaView, View, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import {AntDesign, Ionicons} from '@expo/vector-icons';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native'; // 👈 Alert 추가
+import { AntDesign, Ionicons } from '@expo/vector-icons';
+import API_BASE_URL from '../config/api';
 
 const SignupTermsScreen = ({navigation, route}) => {
-    const {email, password, name} = route.params;
+    const { email, password, name } = route.params;
 
     // 각 체크박스의 선택 여부를 기억할 state들 (true/false)
     const [agreeAll, setAgreeAll] = useState(false);
@@ -13,7 +14,7 @@ const SignupTermsScreen = ({navigation, route}) => {
     const [agreeTerms, setAgreeTerms] = useState(false);
     const [agreePrivacy, setAgreePrivacy] = useState(false);
     const [agreeMarketing, setAgreeMarketing] = useState(false);
-    const BACKEND_URL = 'http://localhost:8088';
+    const BACKEND_URL = 'http://192.168.35.223:8088';
 
     // '전체 동의' 체크박스 로직
     const handleAgreeAll = () => {
@@ -40,26 +41,18 @@ const SignupTermsScreen = ({navigation, route}) => {
     const handleComplete = async () => {
         if (isButtonEnabled) {
             try {
-                // [수정] 꺾쇠 제거 및 상수 사용
-                const response = await fetch(`${BACKEND_URL}/api/auth/signup`, {
+                const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email,
-                        password,
-                        name,
-                    }),
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password, name}),
                 });
 
                 if (response.ok) {
-                    const message = await response.text();
-                    console.log('회원가입 성공:', message);
-                    navigation.navigate('SignupComplete', {name});
+                    Alert.alert('회원가입 성공!', '로그인 화면으로 이동합니다.');
+                    navigation.navigate('Login');
                 } else {
                     const error = await response.json();
-                    Alert.alert('회원가입 실패', error.message || '이미 가입된 이메일이거나 서버 오류입니다.');
+                    Alert.alert('회원가입 실패', error.message || '서버 오류입니다.');
                 }
             } catch (error) {
                 console.error('회원가입 오류:', error);
