@@ -1,40 +1,41 @@
 {
   "expo": {
-    "name": "sweetspot",
-    "slug": "sweetspot",
+    "name": "frontend",
+    "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.hollywood.sweetspot"
+      "bundleIdentifier": "com.hollywood.sweetspot",
+      "config": {
+        "googleMapsApiKey": "AIzaSyDbF2KzTQXCCZNZXwo5HFF-vsbMwOC78UI"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.hollywood.sweetspot"
+      "package": "com.hollywood.sweetspot",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDbF2KzTQXCCZNZXwo5HFF-vsbMwOC78UI"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    },
-    "plugins": [
-      "expo-web-browser",
-      "expo-secure-store",
-      [
-        "@mj-studio/react-native-naver-map",
-        {
-          "clientId": "wkuzya1uhf"
-        }
-      ]
-    ]
+    }
   }
 }
 
