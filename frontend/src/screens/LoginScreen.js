@@ -1,12 +1,14 @@
 import React, {useState} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
-
-import {View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator} from 'react-native';
+import {SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator} from 'react-native';
 import {AntDesign} from '@expo/vector-icons';
-import * as AuthSession from 'expo-auth-session';
-import * as WebBrowser from 'expo-web-browser';
 import {useAuth} from '../contexts/AuthContext';
 import API_BASE_URL from '../config/api';
+import AuthInput from '../components/auth/AuthInput';
+import AuthButton from '../components/auth/AuthButton';
+
+// ✨ 구글/웹 인증 관련 라이브러리 import 추가
+import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -14,19 +16,24 @@ const LoginScreen = ({navigation}) => {
     const {signIn} = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    // 🔻 [추가] 로딩 상태를 관리할 state
     const [isLoading, setIsLoading] = useState(false);
 
     const handleGoogleLogin = async () => {
         try {
-            const redirectUri = AuthSession.makeRedirectUri({scheme: 'exp', useProxy: true});
-            const authUrl = `${API_BASE_URL}/oauth2/authorization/google`;
+            // Expo Go에서 테스트 시, useProxy: true 옵션이 필요합니다.
+            const redirectUri = AuthSession.makeRedirectUri({useProxy: true});
+            const authUrl = `${API_BASE_URL}/oauth2/authorization/google?redirect_uri=${encodeURIComponent(redirectUri)}`;
+
+
+            console.log("프론트엔드가 요청하는 최종 복귀 주소:", redirectUri);
+            console.log("백엔드로 요청하는 전체 인증 주소:", authUrl);
+
             const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
 
             if (result.type === 'success' && result.url) {
-                const params = new URLSearchParams(result.url.split('?')[1]);
-                const accessToken = params.get('accessToken');
-                const refreshToken = params.get('refreshToken');
+                const url = new URL(result.url);
+                const accessToken = url.searchParams.get('accessToken');
+                const refreshToken = url.searchParams.get('refreshToken');
 
                 if (accessToken && refreshToken) {
                     signIn({accessToken, refreshToken});
@@ -39,14 +46,14 @@ const LoginScreen = ({navigation}) => {
             Alert.alert('Google 로그인 중 오류가 발생했습니다.');
         }
     };
-
     const handleLogin = async () => {
         if (!email || !password) {
             Alert.alert('오류', '이메일과 비밀번호를 모두 입력해주세요.');
             return;
         }
-        setIsLoading(true); // 로딩 시작
+        setIsLoading(true);
         try {
+            // API_BASE_URL 앞에 http://를 붙여 완전한 URL을 만듭니다.
             const response = await fetch(`${API_BASE_URL}/api/auth/signin`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -57,17 +64,15 @@ const LoginScreen = ({navigation}) => {
             if (!response.ok) {
                 throw new Error(data.message || '로그인에 실패했습니다.');
             }
-            signIn(data); // 성공 시 AuthContext를 통해 로그인 처리
+            signIn(data);
         } catch (error) {
             Alert.alert('로그인 오류', error.message);
         } finally {
-            setIsLoading(false); // 로딩 종료 (성공/실패 여부와 관계없이)
+            setIsLoading(false);
         }
     };
 
-
     return (
-        // ... JSX 코드는 동일 ...
         <SafeAreaView style={styles.container}>
             <View style={styles.contentContainer}>
                 <View style={styles.header}>
@@ -76,30 +81,28 @@ const LoginScreen = ({navigation}) => {
                 </View>
 
                 <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>이메일</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="이메일을 입력해주세요."
-                        keyboardType="email-address"
+                    <AuthInput
+                        label="이메일"
                         value={email}
                         onChangeText={setEmail}
+                        placeholder="이메일을 입력해주세요."
+                        keyboardType="email-address"
                     />
-
-                    <Text style={styles.inputLabel}>비밀번호</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="영문, 숫자, 특수문자 조합 8자리 이상"
-                        secureTextEntry={true}
+                    <AuthInput
+                        label="비밀번호"
                         value={password}
                         onChangeText={setPassword}
+                        placeholder="비밀번호를 입력해주세요."
+                        secureTextEntry
                     />
                 </View>
-
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-                        <Text style={styles.loginButtonText}>로그인</Text>
-                    </TouchableOpacity>
-
+                    <AuthButton
+                        title="로그인"
+                        onPress={handleLogin}
+                        isLoading={isLoading}
+                        disabled={!email || !password}
+                    />
                     <View style={styles.subButtonContainer}>
                         <TouchableOpacity>
                             <Text style={styles.subButtonText}>비밀번호 재설정</Text>
@@ -109,7 +112,6 @@ const LoginScreen = ({navigation}) => {
                             <Text style={styles.subButtonText}>회원가입</Text>
                         </TouchableOpacity>
                     </View>
-
                     <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
                         <AntDesign name="google" size={24} color="black" style={styles.googleIcon}/>
                         <Text style={styles.googleButtonText}>Google로 로그인</Text>
@@ -119,20 +121,19 @@ const LoginScreen = ({navigation}) => {
         </SafeAreaView>
     );
 };
-// ... (스타일 시트) ...
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#FFFFFF',
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     contentContainer: {
-        width: '70%',
         flex: 1,
+        justifyContent: 'center',
+        paddingHorizontal: '15%',
     },
     header: {
-        flex: 2,
+        flex: 1,
         justifyContent: 'center',
         alignItems: 'flex-start',
     },
@@ -145,40 +146,18 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     inputContainer: {
-        flex: 2,
-    },
-    inputLabel: {
-        fontSize: 16,
-        fontWeight: '500',
-        marginBottom: 8,
-    },
-    input: {
-        borderBottomWidth: 1,
-        borderColor: '#E0E0E0',
-        paddingBottom: 8,
-        fontSize: 16,
-        marginBottom: 24,
+        flex: 1,
+        justifyContent: 'center',
     },
     buttonContainer: {
-        flex: 2,
-    },
-    loginButton: {
-        backgroundColor: '#F5F5F5',
-        paddingVertical: 16,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    loginButtonText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#BDBDBD',
+        flex: 1,
+        justifyContent: 'center',
     },
     subButtonContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 16,
+        marginVertical: 16,
     },
     subButtonText: {
         fontSize: 14,
