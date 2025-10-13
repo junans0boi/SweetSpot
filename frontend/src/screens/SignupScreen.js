@@ -1,15 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import {
-    SafeAreaView,
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    KeyboardAvoidingView,
-    Platform
-} from 'react-native';
-import {AntDesign} from '@expo/vector-icons';
+import {SafeAreaView, View, Text, StyleSheet} from 'react-native';
+import AuthHeader from '../components/auth/AuthHeader';
+import AuthInput from '../components/auth/AuthInput';
+import AuthButton from '../components/auth/AuthButton';
 
 const SignupScreen = ({navigation}) => {
     const [email, setEmail] = useState('');
@@ -59,61 +52,39 @@ const SignupScreen = ({navigation}) => {
 
     return (
         <SafeAreaView style={styles.container}>
+            <AuthHeader title="회원가입" onBackPress={() => navigation.goBack()}/>
             <View style={styles.contentContainer}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-
-                    <AntDesign name="left" size={24} color="black"/>
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>회원가입</Text>
-                </View>
-
-                <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>이메일</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="이메일을 입력해주세요."
-                        keyboardType="email-address"
+                <View style={styles.inputWrapper}>
+                    <AuthInput
+                        label="이메일"
                         value={email}
                         onChangeText={setEmail}
+                        placeholder="이메일을 입력해주세요."
+                        keyboardType="email-address"
                     />
-
-                    <Text style={styles.inputLabel}>비밀번호</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="영문, 숫자, 특수문자 조합 8자리 이상"
-                        secureTextEntry
+                    <AuthInput
+                        label="비밀번호"
                         value={password}
                         onChangeText={setPassword}
-                    />
-                    {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
-
-                    {/* 비밀번호 확인 입력창은 위쪽 입력창과 간격을 주기 위해 스타일 수정 */}
-                    <TextInput
-                        style={[styles.input, {marginTop: 16}]}
                         placeholder="영문, 숫자, 특수문자 조합 8자리 이상"
                         secureTextEntry
+                        errorText={passwordError}
+                    />
+                    <AuthInput
+                        label="비밀번호 확인"
                         value={passwordConfirm}
                         onChangeText={setPasswordConfirm}
+                        placeholder="비밀번호를 다시 입력해주세요."
+                        secureTextEntry
+                        errorText={passwordConfirmError}
                     />
-                    {/* [이동] 에러 메시지를 inputContainer 안으로 이동 */}
-                    {passwordConfirmError ? <Text style={styles.errorText}>{passwordConfirmError}</Text> : null}
                 </View>
-
-                {/* 버튼이 키보드에 가려지지 않도록 flex:1 로 남은 공간을 차지하게 함 */}
-                <View style={{flex: 1}}/>
-
                 <View style={styles.buttonWrapper}>
-                    <TouchableOpacity
-                        style={[
-                            styles.nextButton,
-                            isButtonEnabled() ? styles.nextButtonEnabled : styles.nextButtonDisabled,
-                        ]}
+                    <AuthButton
+                        title="다음"
                         onPress={handleNext}
                         disabled={!isButtonEnabled()}
-                    >
-                        <Text style={styles.nextButtonText}>다음</Text>
-                    </TouchableOpacity>
+                    />
                 </View>
             </View>
         </SafeAreaView>

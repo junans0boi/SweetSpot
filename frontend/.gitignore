@@ -1,23 +1,37 @@
-# ================== #
-# Frontend Settings  #
-# ================== #
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# Node modules
-# npm install로 설치되는 모든 라이브러리 폴더를 무시합니다.
-/node_modules/
+# dependencies
+node_modules/
 
 # Expo
-# Expo가 생성하는 임시 파일 및 캐시 폴더를 무시합니다.
 .expo/
-/dist/
-/web-build/
+dist/
+web-build/
 
-# Native build folders
-# npx expo prebuild로 생성되는 네이티브 폴더는 절대 Git에 올리지 않습니다.
-/android/
-/ios/
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
 
-# 기타
-# Expo가 생성하는 임시 파일
-.npm/
+# Metro
+.metro-health-check*
 
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+.env

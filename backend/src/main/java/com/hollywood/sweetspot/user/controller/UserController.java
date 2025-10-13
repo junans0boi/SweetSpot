@@ -1,5 +1,8 @@
-package com.hollywood.sweetspot.domain.user.controller;
+package com.hollywood.sweetspot.user.controller; // 패키지 경로를 user로 변경
 
+import com.hollywood.sweetspot.user.dto.UserInfoResponse;
+import com.hollywood.sweetspot.user.service.UserService;
+import lombok.RequiredArgsConstructor; // ✅ 추가
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,15 +11,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/users")
+@RequiredArgsConstructor // ✅ 추가
 public class UserController {
 
-    @GetMapping("/me")
-    public ResponseEntity<String> getMyInfo(@AuthenticationPrincipal String userEmail) {
-        // @AuthenticationPrincipal 어노테이션을 사용하면,
-        // JWT 필터가 SecurityContext에 저장한 사용자 정보(여기서는 이메일)를 바로 주입받을 수 있습니다.
+    private final UserService userService; // ✅ UserService 주입
 
-        // 🔻 수정: 응답 문자열 끝에 줄바꿈(\n)을 추가하여 터미널 출력을 깔끔하게 만듭니다.
-        return ResponseEntity.ok("인증 성공! 당신의 이메일은: " + userEmail + "\n");
+    @GetMapping("/me")
+    public ResponseEntity<UserInfoResponse> getMyInfo(@AuthenticationPrincipal String userEmail) {
+        // @AuthenticationPrincipal 어노테이션을 통해 JWT 토큰의 소유자 이메일을 가져옵니다.
+        // 이 이메일을 사용하여 UserService에서 사용자 정보를 조회합니다.
+        UserInfoResponse userInfo = userService.getUserInfo(userEmail);
+        return ResponseEntity.ok(userInfo);
     }
 }
-
