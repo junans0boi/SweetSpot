@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 new AntPathRequestMatcher("/api/auth/**"),
                                 new AntPathRequestMatcher("/api/test"),
+                                new AntPathRequestMatcher("/api/places/**"),
                                 new AntPathRequestMatcher("/oauth2/**"),
                                 new AntPathRequestMatcher("/login/oauth2/**")
                         ).permitAll()

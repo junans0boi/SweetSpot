@@ -7,8 +7,9 @@ import SignupScreen from '../screens/SignupScreen';
 import SignupNameScreen from '../screens/SignupNameScreen';
 import SignupTermsScreen from '../screens/SignupTermsScreen';
 import SignupCompleteScreen from '../screens/SignupCompleteScreen';
-import MainTabNavigator from './MainTabNavigator'; // MainTabNavigator import
-
+import MainTabNavigator from './MainTabNavigator';
+import PlaceDetailScreen from '../screens/PlaceDetailScreen';
+import WriteReviewScreen from '../screens/WriteReviewScreen';
 const Stack = createStackNavigator();
 
 const AuthStack = () => (
@@ -21,17 +22,24 @@ const AuthStack = () => (
     </Stack.Navigator>
 );
 
+// ✅ 메인 앱 스택: 탭 네비게이터와 상세 페이지를 포함
+const MainAppStack = () => (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+        <Stack.Screen name="PlaceDetail" component={PlaceDetailScreen} />
+        <Stack.Screen name="WriteReview" component={WriteReviewScreen} />
+    </Stack.Navigator>
+);
+
 const AppNavigator = () => {
-    // ✨ useAuth에서 authState를 직접 가져와 isAuthenticated를 확인합니다.
     const { authState } = useAuth();
 
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             {authState.isAuthenticated ? (
-                // 토큰이 있으면 메인 탭 네비게이터를 보여줌
-                <Stack.Screen name="MainApp" component={MainTabNavigator} />
+                // ✅ 인증된 사용자는 메인 앱 스택으로 이동
+                <Stack.Screen name="MainApp" component={MainAppStack} />
             ) : (
-                // 토큰이 없으면 인증 스택을 보여줌
                 <Stack.Screen name="Auth" component={AuthStack} />
             )}
         </Stack.Navigator>
@@ -39,4 +47,3 @@ const AppNavigator = () => {
 };
 
 export default AppNavigator;
-

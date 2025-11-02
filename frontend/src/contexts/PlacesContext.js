@@ -1,20 +1,22 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { GOOGLE_PLACES_API_KEY as API_KEY } from '@env'; // ✨ @env에서 API 키 import
-import axios from 'axios';
+import React, { createContext, useState, useEffect } from 'react';
+import { Alert } from 'react-native';
+import { GOOGLE_PLACES_API_KEY as API_KEY } from '@env';
 import * as Location from 'expo-location';
-import allRestaurantData from '../../restaurants.json';
-import proj4 from 'proj4';
 
-// 좌표계 설정
-proj4.defs("EPSG:5174", "+proj=tmerc +lat_0=38 +lon_0=127.0028902777778 +k=1 +x_0=200000 +y_0=500000 +ellps=bessel +units=m +no_defs +towgs84=-115.80,474.99,674.11,1.16,-2.31,-1.63,6.43");
+// ✅ 1. axios, API_BASE_URL 삭제
+// ✅ 2. 우리가 만든 작은 목업 파일을 직접 import 합니다.
+import mockPlacesData from '../data/places.mock.json';
 
 export const PlacesContext = createContext();
 
 export const PlacesProvider = ({ children }) => {
-    const [savedPlaces, setSavedPlaces] = useState([allRestaurantData[10], allRestaurantData[25]]);
+    const [savedPlaces, setSavedPlaces] = useState([]);
     const [userLocation, setUserLocation] = useState(null);
     const [userCity, setUserCity] = useState(null);
-    const [allPlaces, setAllPlaces] = useState([]);
+    
+    // ✅ 3. allPlaces의 초기값을 목업 데이터로 바로 설정합니다.
+    const [allPlaces, setAllPlaces] = useState(mockPlacesData);
+    const [isLoading, setIsLoading] = useState(true);
 
     const handleToggleSave = (place) => {
         setSavedPlaces(prev => {
@@ -27,52 +29,35 @@ export const PlacesProvider = ({ children }) => {
         });
     };
 
+    // ✅ 4. fetchNearbyPlaces 함수를 완전히 제거합니다. (더 이상 필요 없음)
+    
     useEffect(() => {
-        const transformedData = allRestaurantData.map(place => {
-            if (place.coordinate && place.coordinate.longitude && place.coordinate.latitude) {
-                const [lon, lat] = proj4("EPSG:5174", "WGS84", [place.coordinate.longitude, place.coordinate.latitude]);
-                return { ...place, coordinate: { latitude: lat, longitude: lon } };
-            }
-            return null;
-        }).filter(Boolean);
-        setAllPlaces(transformedData);
-
-        (async () => {
-            let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                setUserLocation({ latitude: 37.3946, longitude: 126.9573 });
-                setUserCity('안양시');
-                return;
-            }
-            let location = await Location.getCurrentPositionAsync({});
-            const { latitude, longitude } = location.coords;
-
+        const loadInitialData = async () => {
+            setIsLoading(true);
             try {
-                // ✨ Expo의 reverseGeocodeAsync 대신 Google Geocoding API 직접 사용
-                const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
-                    params: {
-                        latlng: `${latitude},${longitude}`,
-                        key: API_KEY, // ✨ .env에서 가져온 키 사용
-                        language: 'ko',
-                    },
-                });
-
-                if (response.data.results && response.data.results.length > 0) {
-                    const addressComponents = response.data.results[0].address_components;
-                    const cityComponent = addressComponents.find(c => c.types.includes('locality'));
-                    setUserCity(cityComponent ? cityComponent.long_name : '알 수 없음');
+                // ✅ 5. 거대한 JSON 로딩/파싱/API 호출 로직이 모두 사라지고,
+                //    오직 '현재 위치'를 가져오는 작업만 남깁니다.
+                let { status } = await Location.requestForegroundPermissionsAsync();
+                let location;
+                if (status !== 'granted') {
+                    location = { latitude: 37.3615, longitude: 126.9318 }; // 기본 위치 (산본)
+                    setUserCity('군포시');
+                } else {
+                    const loc = await Location.getCurrentPositionAsync({});
+                    location = loc.coords;
+                    let address = await Location.reverseGeocodeAsync(location);
+                    if (address.length > 0) setUserCity(address[0].city);
                 }
-                setUserLocation({ latitude, longitude });
-
+                setUserLocation(location);
+                
             } catch (error) {
-                console.error("Google Geocoding API Error on startup:", error);
-                // API 실패 시 기본값 설정
-                setUserLocation({ latitude: 37.3946, longitude: 126.9573 });
-                setUserCity('안양시');
+                console.error("초기 데이터 로딩 실패:", error);
+            } finally {
+                setIsLoading(false); // 위치 정보만 가져오면 로딩 끝!
             }
-        })();
+        };
+        loadInitialData();
     }, []);
-
 
     return (
         <PlacesContext.Provider value={{
@@ -80,10 +65,11 @@ export const PlacesProvider = ({ children }) => {
             onToggleSave: handleToggleSave,
             userLocation,
             userCity,
-            allPlaces,
+            allPlaces, // ✅ 항상 목업 데이터를 반환
             setUserLocation,
             setUserCity,
-            GOOGLE_PLACES_API_KEY: API_KEY, // ✨ Context를 통해 API 키 제공
+            GOOGLE_PLACES_API_KEY: API_KEY,
+            isLoading,
         }}>
             {children}
         </PlacesContext.Provider>

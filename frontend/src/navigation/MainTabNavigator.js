@@ -8,8 +8,7 @@ import HomeScreen from '../screens/HomeScreen';
 import RecommendScreen from '../screens/RecommendScreen';
 import SavedScreen from '../screens/SavedScreen';
 import MyPageScreen from '../screens/MyPageScreen';
-import RestaurantListScreen from '../screens/RestaurantListScreen';
-
+import PlaceListScreen from '../screens/PlaceListScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
@@ -17,7 +16,7 @@ function RecommendStackScreen() {
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Recommend" component={RecommendScreen} />
-            <Stack.Screen name="RestaurantList" component={RestaurantListScreen} />
+            <Stack.Screen name="PlaceList" component={PlaceListScreen} />
         </Stack.Navigator>
     );
 }

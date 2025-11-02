@@ -1,18 +1,36 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+// ✅ expo-image import 제거
+
+// 카테고리에 따라 다른 아이콘을 반환하는 헬퍼 객체
+const categoryIcons = {
+    '맛집': 'restaurant-outline',
+    '놀거리': 'game-controller-outline',
+    '문화/관광': 'map-outline',
+    '카페': 'cafe-outline'
+};
 
 export default function PlaceCard({ item, onPress, onToggleSave, isSaved }) {
-    // tags가 없는 경우를 대비한 안전장치
     const tags = item.tags || [];
+
+    // ✅ [수정] Google API 및 item.image 관련 로직 모두 제거
+    // const imageUrl = item.image || null;
 
     return (
         <TouchableOpacity style={styles.cardContainer} onPress={onPress}>
-            <Image source={{ uri: item.image }} style={styles.cardImage} />
+            {/* ✅ 이미지 View 제거 */}
+
             <View style={styles.infoContainer}>
                 <View style={styles.header}>
+                    <Ionicons
+                        name={categoryIcons[item.mainCategory] || 'location-outline'}
+                        size={16}
+                        color="#888"
+                        style={styles.categoryIcon}
+                    />
                     <Text style={styles.placeName} numberOfLines={1}>{item.name}</Text>
-                    {item.distance != null && <Text style={styles.distanceText}>{item.distance.toFixed(2)} km</Text>}
+                    {item.distance != null && <Text style={styles.distanceText}>{item.distance.toFixed(1)}km</Text>}
                 </View>
                 <Text style={styles.addressText} numberOfLines={1}>{item.address}</Text>
                 <View style={styles.tagsContainer}>
@@ -23,21 +41,16 @@ export default function PlaceCard({ item, onPress, onToggleSave, isSaved }) {
                     ))}
                 </View>
             </View>
-            {/* --- ✨ 찜(저장) 버튼 추가 --- */}
             <TouchableOpacity style={styles.saveButton} onPress={() => onToggleSave(item)}>
-                <Ionicons
-                    name={isSaved ? "heart" : "heart-outline"}
-                    size={24}
-                    color={isSaved ? "#FF7A00" : "#ccc"}
-                />
+                <Ionicons name={isSaved ? "heart" : "heart-outline"} size={24} color={isSaved ? "#FF7A00" : "#ccc"} />
             </TouchableOpacity>
         </TouchableOpacity>
     );
 }
 
+// ✅ [수정] 이미지 없는 UI에 맞게 스타일 변경
 const styles = StyleSheet.create({
     cardContainer: {
-        flexDirection: 'row',
         backgroundColor: '#fff',
         borderRadius: 15,
         marginVertical: 8,
@@ -50,22 +63,19 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#f0f0f0',
     },
-    cardImage: {
-        width: 100,
-        height: '100%',
-        borderTopLeftRadius: 14,
-        borderBottomLeftRadius: 14,
-    },
     infoContainer: {
         flex: 1,
         padding: 12,
+        paddingRight: 40, // 하트 버튼 공간 확보
         justifyContent: 'space-between',
     },
     header: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         marginBottom: 4,
+    },
+    categoryIcon: {
+        marginRight: 6,
     },
     placeName: {
         fontSize: 17,
@@ -78,6 +88,7 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: '#FF7A00',
         fontWeight: 'bold',
+        marginLeft: 'auto',
     },
     addressText: {
         fontSize: 13,
@@ -105,8 +116,6 @@ const styles = StyleSheet.create({
         top: 10,
         right: 10,
         padding: 5,
-        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-        borderRadius: 15,
     },
 });
 
