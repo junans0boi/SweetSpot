@@ -41,6 +41,7 @@ dependencies {
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
     // DB 드라이버
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
@@ -48,7 +49,6 @@ dependencies {
 
     // 개발용 도구
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-
     // 테스트
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'

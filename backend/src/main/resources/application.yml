@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:../.env[.properties]
   jpa:
     hibernate:
       ddl-auto: update # 공통 ddl-auto 설정은 유지합니다.
@@ -65,3 +67,6 @@ front:
 # JWT 설정
 jwt:
   secret: ${JWT_SECRET}
+
+server:
+  port: 5005

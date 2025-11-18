@@ -31,7 +31,7 @@ WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 # 애플리케이션 실행 포트 노출
-EXPOSE 8080
+EXPOSE 5005
 
 # 컨테이너 시작 시 애플리케이션 실행
 ENTRYPOINT ["java", "-jar", "app.jar"]

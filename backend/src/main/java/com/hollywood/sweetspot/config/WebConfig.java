@@ -17,7 +17,8 @@ public class WebConfig {
                                 "http://localhost:19006",     // Expo 웹 미리보기
                                 "http://192.168.35.130:19006", // 실제 기기 접근
                                 "http://192.168.35.130",       // 기본 IP 접근
-                                "http://localhost:8088"       // [추가] Docker 웹 빌드 접근 허용
+                                "http://localhost:8088",      // [추가] Docker 웹 빌드 접근 허용
+                                "https://admin.sweetspot.kro.kr"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowCredentials(true);
