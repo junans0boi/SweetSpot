@@ -14,12 +14,19 @@ public class PlaceController {
     private final GooglePlacesService googlePlacesService;
 
     /**
-     * 프론트엔드에서 placeId를 보내면 Google Places API에서 상세정보를 반환
-     * 예: GET /api/places/details?placeId=ChIJN1t_tDeuEmsRUsoyG83frY4
+     * ✅ [수정] 프론트엔드에서 우리 DB의 id(Long)를 보내면,
+     * 서비스가 Google Place ID를 찾거나 캐시된 데이터를 반환합니다.
+     * 예: GET /api/places/details/123
      */
-    @GetMapping("/details")
-    public ResponseEntity<PlaceDetailDto> getPlaceDetails(@RequestParam String placeId) {
-        PlaceDetailDto dto = googlePlacesService.getPlaceDetails(placeId);
-        return ResponseEntity.ok(dto);
+    @GetMapping("/details/{id}")
+    public ResponseEntity<PlaceDetailDto> getPlaceDetails(@PathVariable Long id) {
+        try {
+            PlaceDetailDto dto = googlePlacesService.getPlaceDetails(id);
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            // e.printStackTrace(); // 디버깅용
+            return ResponseEntity.notFound().build();
+        }
     }
 }
+

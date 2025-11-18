@@ -2,90 +2,16 @@ services:
   backend:
     build:
       context: ./backend
+  
     container_name: sweetspot-backend
     restart: always
     env_file: ./.env
+    ports:
+      - "5005:5005"
+      
     # DB 서비스들이 healthy 상태가 된 후에 백엔드를 시작합니다.
-    depends_on:
-      auth-db:
-        condition: service_healthy
-      domain-db:
-        condition: service_healthy
-    environment:
-      - SPRING_DATASOURCE_AUTH_URL=jdbc:mariadb://auth-db:3306/sweetspot_auth?useUnicode=true&characterEncoding=utf8
-      - SPRING_DATASOURCE_AUTH_USERNAME=${MariaDB_DB_USER}
-      - SPRING_DATASOURCE_AUTH_PASSWORD=${MariaDB_DB_PASSWORD}
-      - SPRING_DATASOURCE_DOMAIN_URL=jdbc:postgresql://domain-db:5432/sweetspot_places
-      - SPRING_DATASOURCE_DOMAIN_USERNAME=${Postgre_DB_USER}
-      - SPRING_DATASOURCE_DOMAIN_PASSWORD=${Postgre_DB_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - MAIL_USERNAME=${MAIL_USERNAME}
-      - MAIL_PASSWORD=${MAIL_PASSWORD}
-      - FRONT_BASE_URL=${FRONT_BASE_URL}
-    networks:
-      - sweetspot-network
-
-  auth-db:
-    image: mariadb:10.8
-    container_name: sweetspot-auth-db
-    restart: always
-    environment:
-      - MARIADB_DATABASE=sweetspot_auth
-      - MARIADB_USER=${MariaDB_DB_USER}
-      - MARIADB_PASSWORD=${MariaDB_DB_PASSWORD}
-      - MARIADB_ROOT_PASSWORD=${MariaDB_DB_ROOT_PASSWORD}
-      - TZ=Asia/Seoul
-    volumes:
-      - ./data/mariadb_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    # DB가 준비되었는지 확인하는 healthcheck 추가
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MariaDB_DB_USER}", "-p${MariaDB_DB_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - sweetspot-network
-
-  domain-db:
-    image: postgis/postgis:15-3.4
-    container_name: sweetspot-domain-db
-    restart: always
-    platform: linux/amd64
-
-    environment:
-      - POSTGRES_DB=sweetspot_places
-      - POSTGRES_USER=${Postgre_DB_USER}
-      - POSTGRES_PASSWORD=${Postgre_DB_PASSWORD}
-      - TZ=Asia/Seoul
-    volumes:
-      - ./data/postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    # DB가 준비되었는지 확인하는 healthcheck 추가
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${Postgre_DB_USER} -d sweetspot_places"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - sweetspot-network
-
-
-  proxy:
-    image: nginx:stable-alpine
-    container_name: sweetspot-proxy
-    restart: always
-    ports:
-      - "8088:80"
-    volumes:
-      - ./proxy/nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - backend
-
+   
+    
     networks:
       - sweetspot-network
 
