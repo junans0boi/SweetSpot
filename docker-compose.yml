@@ -1,17 +1,46 @@
 services:
-  backend:
+  # 1. 사용자용 API 서버 (Backend)
+  api-server:
     build:
-      context: ./backend
-  
-    container_name: sweetspot-backend
+      context: .
+      dockerfile: sweetspot-api/Dockerfile
+    container_name: sweetspot-api
     restart: always
-    env_file: ./.env
     ports:
-      - "5005:5005"
-      
-    # DB 서비스들이 healthy 상태가 된 후에 백엔드를 시작합니다.
-   
-    
+      - "5005:5005" # ✅ Host:Container (5005로 복구)
+    env_file: ./.env
+    networks:
+      - sweetspot-network
+
+  # 2. 관리자용 Admin 서버 (Backend)
+  admin-server:
+    build:
+      context: .
+      dockerfile: sweetspot-admin/Dockerfile
+    container_name: sweetspot-admin
+    restart: always
+    ports:
+      - "5007:5007" # ✅ Host:Container (5008이 아니라 5007이어야 함)
+    env_file: ./.env
+    volumes:
+      - ./output:/app/output          # data.json 파일 접근용
+      - ./csv-data:/app/csv-data      # CSV 파일 업로드용
+      - ./logs:/app/logs              # 로그 파일 저장용 (호스트에서도 볼 수 있게)
+    networks:
+      - sweetspot-network
+
+  # 3. 관리자용 Frontend (React) - [신규 추가]
+  admin-client:
+    build:
+      context: ./frontend-admin
+      dockerfile: Dockerfile
+    container_name: sweetspot-admin-client
+    restart: always
+    ports:
+      - "5008:5008" # ✅ Nginx가 여기로 연결함
+    environment:
+      # Vite 앱이 백엔드 API 주소를 알 수 있게 설정 (필요시 수정)
+      - VITE_API_BASE_URL=https://admin.sweetspot.kro.kr/api/admin
     networks:
       - sweetspot-network
 

@@ -1,0 +1,42 @@
+plugins {
+    id 'java-library' // 라이브러리용 플러그인
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
+
+group = 'com.hollywood'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // 1. JPA & DB
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    api 'org.hibernate.orm:hibernate-spatial:6.4.4.Final' // 좌표 데이터용
+
+    // 2. DB Drivers (MariaDB, PostgreSQL)
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // 3. Security Core (User Details 등 공통 객체용)
+    api 'org.springframework.security:spring-security-core'
+    
+    // 4. Validation & Util
+    api 'org.springframework.boot:spring-boot-starter-validation'
+    api 'org.apache.commons:commons-lang3:3.12.0'
+    
+    // 5. Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+
+// 실행 가능한 Jar 파일 생성을 끕니다 (라이브러리이므로)
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}

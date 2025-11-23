@@ -1,0 +1,26 @@
+# Gradle cache and build outputs
+.gradle
+build
+output
+
+# Git directory
+.git
+
+# IDE and editor configuration
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+
+# Local environment file (should be passed via docker-compose, not copied)
+.env
+
+# Data directory mounted as a volume
+csv-data/
+
+# Node.js dependencies (if any)
+node_modules
+
+# Log files
+*.log

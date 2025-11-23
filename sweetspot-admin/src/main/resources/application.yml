@@ -1,0 +1,54 @@
+# sweetspot-admin/src/main/resources/application.yml
+
+csv:
+  directory-path: /home/ubuntu/Project/SweetSpot/csv-data
+  
+server:
+  port: 5007
+  connection-timeout: 1800s
+
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 2GB
+      max-request-size: 2GB
+
+# ✅ [핵심 수정] .env 파일의 변수명과 정확히 일치시킴
+datasources:
+  auth:
+    url: ${SPRING_DATASOURCE_AUTH_URL}
+    username: ${SPRING_DATASOURCE_AUTH_USERNAME}
+    password: ${SPRING_DATASOURCE_AUTH_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.MariaDBDialect
+      # ddl-auto: none
+
+  domain:
+    url: ${SPRING_DATASOURCE_DOMAIN_URL}
+    username: ${SPRING_DATASOURCE_DOMAIN_USERNAME}
+    password: ${SPRING_DATASOURCE_DOMAIN_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+          hbm2ddl:
+              auto: update 
+
+jwt:
+  secret: ${JWT_SECRET}
+
+
+google:
+  api:
+    key: ${GOOGLE_API_KEY}
+    url: "https://maps.googleapis.com/maps/api/geocode/json"
+
+project:
+  root-path: /app # Docker 내부 경로는 /app 입니다.
