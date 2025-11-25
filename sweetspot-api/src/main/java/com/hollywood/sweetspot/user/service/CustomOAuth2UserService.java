@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import com.hollywood.sweetspot.core.domain.user.entity.User;
 import com.hollywood.sweetspot.core.domain.user.repository.UserRepository;
-import com.hollywood.sweetspot.global.security.oauth2.CustomOAuth2User;
-import com.hollywood.sweetspot.global.security.oauth2.OAuthAttributes;
+import com.hollywood.sweetspot.core.global.security.oauth2.CustomOAuth2User;
+import com.hollywood.sweetspot.core.global.security.oauth2.OAuthAttributes;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

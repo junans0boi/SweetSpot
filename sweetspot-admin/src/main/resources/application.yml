@@ -8,6 +8,8 @@ server:
   connection-timeout: 1800s
 
 spring:
+  jpa:
+    open-in-view: false
   config:
     import: optional:file:.env[.properties]
   servlet:
@@ -29,17 +31,11 @@ datasources:
           dialect: org.hibernate.dialect.MariaDBDialect
       # ddl-auto: none
 
-  domain:
-    url: ${SPRING_DATASOURCE_DOMAIN_URL}
-    username: ${SPRING_DATASOURCE_DOMAIN_USERNAME}
-    password: ${SPRING_DATASOURCE_DOMAIN_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-    jpa:
-      properties:
-        hibernate:
-          dialect: org.hibernate.dialect.PostgreSQLDialect
-          hbm2ddl:
-              auto: update 
+  logging:
+    level:
+      org.hibernate.SQL: debug
+      org.hibernate.orm.jdbc.bind: trace
+      org.hibernate.hbm2ddl: debug
 
 jwt:
   secret: ${JWT_SECRET}

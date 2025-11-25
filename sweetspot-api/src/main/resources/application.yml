@@ -4,6 +4,7 @@ spring:
   config:
     import: optional:file:../.env[.properties]
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update # 공통 ddl-auto 설정은 유지합니다.
     properties:

@@ -129,7 +129,15 @@ public class JsonImportService {
     private Place transformToPlace(Map<String, String> record) {
         Place place = new Place();
 
-                // place.setId(Long.parseLong(record.get("id"))); // Let DB generate ID
+        String idString = record.get("id");
+        if (StringUtils.hasText(idString)) {
+            try {
+                place.setId(Long.parseLong(idString));
+            } catch (NumberFormatException e) {
+                log.warn("[JsonImportService] Invalid ID format in record, letting DB generate: {}", idString);
+                // If ID is invalid, proceed without setting it, letting the DB generate if configured.
+            }
+        }
         place.setName(record.get("name"));
         place.setMainCategory(record.get("mainCategory"));
         

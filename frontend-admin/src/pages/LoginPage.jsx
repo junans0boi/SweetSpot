@@ -5,7 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2';
 
 // ❗️ 메인 백엔드(로그인용) URL
-const MAIN_API_URL = 'https://sweetspot.kro.kr/api/auth';
+const MAIN_API_URL = 'http://localhost:5005/api/auth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');

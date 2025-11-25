@@ -2,7 +2,7 @@ package com.hollywood.sweetspotadmin.config;
 
 import lombok.RequiredArgsConstructor;
 import com.hollywood.sweetspot.core.domain.user.entity.Role;
-import com.hollywood.sweetspotadmin.global.security.JwtAuthenticationFilter;
+import com.hollywood.sweetspot.core.global.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

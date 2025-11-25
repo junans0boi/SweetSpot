@@ -7,6 +7,12 @@ export default defineConfig({
   
   // ✅ [추가] 이 부분을 추가하세요
   server: {
+    proxy: {
+      '/api/admin': {
+        target: 'http://admin-server:5007',
+        changeOrigin: true,
+      },
+    },
     allowedHosts: [
       'admin.sweetspot.kro.kr'
     ]
