@@ -1,0 +1,28 @@
+server:
+  forward-headers-strategy: native
+
+datasources:
+  auth:
+    driver-class-name: org.mariadb.jdbc.Driver
+    # 실제 서버에서는 DB VM 에 직접 붙을 거면 .env 값 그대로 쓰는 게 깔끔
+    url: ${SPRING_DATASOURCE_AUTH_URL}          # jdbc:mariadb://10.0.20.212:3306/sweetspot_auth
+    username: ${SPRING_DATASOURCE_AUTH_USERNAME}
+    password: ${SPRING_DATASOURCE_AUTH_PASSWORD}
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.MariaDBDialect
+          hbm2ddl:
+            auto: validate
+
+  domain:
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_DOMAIN_URL}        # jdbc:postgresql://10.0.20.212:5432/sweetspot_places
+    username: ${SPRING_DATASOURCE_DOMAIN_USERNAME}
+    password: ${SPRING_DATASOURCE_DOMAIN_PASSWORD}
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+          hbm2ddl:
+            auto: validate

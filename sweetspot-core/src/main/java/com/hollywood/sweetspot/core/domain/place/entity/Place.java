@@ -19,6 +19,8 @@ import java.util.List;
 public class Place {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "place_seq_generator")
+    @SequenceGenerator(name = "place_seq_generator", sequenceName = "place_id_seq", allocationSize = 1)
     private Long id; 
 
     @Column(nullable = false)

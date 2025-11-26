@@ -18,6 +18,7 @@ const { handleLogout } = useOutletContext();
     try {
       setLoading(true);
       const response = await apiClient.get('/users');
+      console.log('API Response for /users:', response.data); // 데이터 구조 확인용
       setUsers(response.data);
       setError(null);
     } catch (err) {

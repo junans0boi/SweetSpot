@@ -1,11 +1,11 @@
 package com.hollywood.sweetspot.config;
 
 import lombok.RequiredArgsConstructor;
-import com.hollywood.sweetspot.user.service.CustomOAuth2UserService;
-import com.hollywood.sweetspot.global.security.JwtAuthenticationFilter;
-import com.hollywood.sweetspot.global.security.oauth2.handler.OAuth2LoginFailureHandler;
-import com.hollywood.sweetspot.global.security.oauth2.handler.OAuth2LoginSuccessHandler;
-import com.hollywood.sweetspot.global.security.oauth2.handler.HttpCookieOAuth2AuthorizationRequestRepository; // ✅ Import 추가
+import com.hollywood.sweetspot.core.domain.user.service.CustomOAuth2UserService;
+import com.hollywood.sweetspot.core.global.security.JwtAuthenticationFilter;
+import com.hollywood.sweetspot.core.global.security.oauth2.handler.OAuth2LoginFailureHandler;
+import com.hollywood.sweetspot.core.global.security.oauth2.handler.OAuth2LoginSuccessHandler;
+import com.hollywood.sweetspot.core.global.security.oauth2.handler.HttpCookieOAuth2AuthorizationRequestRepository; // ✅ Import 추가
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

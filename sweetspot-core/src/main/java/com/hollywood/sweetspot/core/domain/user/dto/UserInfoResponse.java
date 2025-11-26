@@ -1,6 +1,6 @@
 // UserInfoResponse.java
 
-package com.hollywood.sweetspot.user.dto;
+package com.hollywood.sweetspot.core.domain.user.dto;
 
 import lombok.Getter;
 import lombok.AllArgsConstructor;

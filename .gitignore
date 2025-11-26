@@ -67,3 +67,4 @@ android/app/build/
 android/.gradle/
 ios/Pods/
 ios/build/
+data/ 

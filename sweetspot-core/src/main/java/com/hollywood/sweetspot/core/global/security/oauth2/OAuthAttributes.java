@@ -1,4 +1,4 @@
-package com.hollywood.sweetspot.global.security.oauth2;
+package com.hollywood.sweetspot.core.global.security.oauth2;
 
 import java.util.Map;
 import java.util.Collections;

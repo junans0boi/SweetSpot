@@ -5,9 +5,9 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -21,43 +21,40 @@ import javax.sql.DataSource;
 @EnableJpaRepositories(basePackages = "com.hollywood.sweetspot.core.domain.user.repository", entityManagerFactoryRef = "authEntityManagerFactory", transactionManagerRef = "authTransactionManager")
 public class AuthDataSourceConfig {
 
-    @Primary
     @Bean(name = "authProperties")
     @ConfigurationProperties(prefix = "datasources.auth")
     public DataSourceProperties authDataSourceProperties() {
         return new DataSourceProperties();
     }
 
-    // 🔸 datasources.auth.jpa.* 를 매핑할 전용 JpaProperties
-    @Primary
     @Bean(name = "authJpaProperties")
     @ConfigurationProperties(prefix = "datasources.auth.jpa")
     public JpaProperties authJpaProperties() {
         return new JpaProperties();
     }
 
-    @Primary
     @Bean(name = "authDataSource")
     public DataSource authDataSource(@Qualifier("authProperties") DataSourceProperties properties) {
-        return properties.initializeDataSourceBuilder().build();
+        return properties.initializeDataSourceBuilder()
+                .driverClassName("org.mariadb.jdbc.Driver")
+                .build();
     }
 
-    @Primary
     @Bean(name = "authEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean authEntityManagerFactory(
-            EntityManagerFactoryBuilder builder,
             @Qualifier("authDataSource") DataSource dataSource,
             @Qualifier("authJpaProperties") JpaProperties jpaProps) {
+        EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder(
+                new HibernateJpaVendorAdapter(), jpaProps.getProperties(), null
+        );
         return builder
                 .dataSource(dataSource)
-                // ✅ [수정] Core 모듈 내부의 User Entity 경로로 수정
                 .packages("com.hollywood.sweetspot.core.domain.user.entity")
                 .persistenceUnit("auth")
                 .properties(jpaProps.getProperties())
                 .build();
     }
 
-    @Primary
     @Bean(name = "authTransactionManager")
     public PlatformTransactionManager authTransactionManager(
             @Qualifier("authEntityManagerFactory") LocalContainerEntityManagerFactoryBean emf) {

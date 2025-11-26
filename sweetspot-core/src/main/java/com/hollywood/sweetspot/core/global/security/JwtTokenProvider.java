@@ -1,5 +1,11 @@
-package com.hollywood.sweetspotadmin.global.security;
+package com.hollywood.sweetspot.core.global.security;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Collection;
+import java.util.stream.Collectors;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -12,13 +18,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Collection;
-import java.util.Date;
-import java.util.stream.Collectors;
-
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
@@ -28,8 +27,10 @@ public class JwtTokenProvider {
 
     private SecretKey secretKey;
 
-    private static final long ACCESS_TOKEN_VALIDITY_MS = 30 * 60 * 1000L; // 30분
-    private static final long REFRESH_TOKEN_VALIDITY_MS = 14 * 24 * 60 * 60 * 1000L; // 14일
+    // Access Token 유효 시간: 30분
+    private static final long ACCESS_TOKEN_VALIDITY_MS = 30 * 60 * 1000L;
+    // Refresh Token 유효 시간: 14일
+    private static final long REFRESH_TOKEN_VALIDITY_MS = 14 * 24 * 60 * 60 * 1000L;
 
     @PostConstruct
     protected void init() {

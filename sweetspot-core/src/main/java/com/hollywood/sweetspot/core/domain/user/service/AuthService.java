@@ -1,13 +1,13 @@
-package com.hollywood.sweetspot.user.service;
+package com.hollywood.sweetspot.core.domain.user.service;
 
 import java.util.List;
 import java.util.Collections;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import com.hollywood.sweetspot.global.security.JwtTokenProvider;
-import com.hollywood.sweetspot.user.dto.SignInRequest;
-import com.hollywood.sweetspot.user.dto.SignUpRequest;
-import com.hollywood.sweetspot.user.dto.TokenResponse;
+import com.hollywood.sweetspot.core.global.security.JwtTokenProvider;
+import com.hollywood.sweetspot.core.domain.user.dto.SignInRequest;
+import com.hollywood.sweetspot.core.domain.user.dto.SignUpRequest;
+import com.hollywood.sweetspot.core.domain.user.dto.TokenResponse;
 import com.hollywood.sweetspot.core.domain.user.entity.Provider;
 import com.hollywood.sweetspot.core.domain.user.entity.Role;
 import com.hollywood.sweetspot.core.domain.user.entity.User;

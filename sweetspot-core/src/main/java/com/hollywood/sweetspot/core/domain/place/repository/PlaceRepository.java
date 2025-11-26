@@ -35,4 +35,7 @@ public interface PlaceRepository extends JpaRepository<Place, Long>, JpaSpecific
 
     @Query("SELECT name FROM Place p WHERE p.mainCategory = :mainCategory")
     Stream<String> streamNamesByMainCategory(String mainCategory);
+
+    // 해당 Google Place ID가 존재하는지 확인
+    boolean existsByGooglePlaceId(String googlePlaceId);
 }

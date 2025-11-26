@@ -5,8 +5,8 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   
-  // ✅ [추가] 이 부분을 추가하세요
   server: {
+    // 프록시는 필요 없지만, allowedHosts는 필요합니다.
     allowedHosts: [
       'admin.sweetspot.kro.kr'
     ]

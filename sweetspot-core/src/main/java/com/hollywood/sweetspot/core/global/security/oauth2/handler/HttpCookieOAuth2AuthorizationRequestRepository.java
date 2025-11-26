@@ -1,6 +1,4 @@
-// HttpCookieOAuth2AuthorizationRequestRepository.java
-
-package com.hollywood.sweetspot.global.security.oauth2.handler;
+package com.hollywood.sweetspot.core.global.security.oauth2.handler;
 
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;

@@ -73,8 +73,7 @@ public class AdminUserController {
         // --- User.java 수정이 어렵다는 가정 하의 대체 코드 ---
         // (User 엔티티의 roles 필드가 List 인터페이스라고 가정)
         user.getRoles().clear(); // 기존 권한을 모두 삭제
-        user.getRoles().addAll(request.toRoleEnums()); // 새 권한 추가
-        // ---------------------------------------------
+        user.updateRoles(request.toRoleEnums()); // User 엔티티에 메서드를 추가하고 사용        // ---------------------------------------------
 
         User updatedUser = userRepository.save(user);
 

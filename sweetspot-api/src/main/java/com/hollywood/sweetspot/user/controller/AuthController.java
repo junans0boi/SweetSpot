@@ -3,10 +3,10 @@ package com.hollywood.sweetspot.user.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import com.hollywood.sweetspot.user.dto.SignInRequest;
-import com.hollywood.sweetspot.user.dto.SignUpRequest;
-import com.hollywood.sweetspot.user.dto.TokenResponse;
-import com.hollywood.sweetspot.user.service.AuthService;
+import com.hollywood.sweetspot.core.domain.user.dto.SignInRequest;
+import com.hollywood.sweetspot.core.domain.user.dto.SignUpRequest;
+import com.hollywood.sweetspot.core.domain.user.dto.TokenResponse;
+import com.hollywood.sweetspot.core.domain.user.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

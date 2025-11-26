@@ -1,4 +1,4 @@
-package com.hollywood.sweetspot.global.security.oauth2.handler;
+package com.hollywood.sweetspot.core.global.security.oauth2.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.ServletException;

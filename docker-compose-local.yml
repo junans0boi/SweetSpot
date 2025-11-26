@@ -1,5 +1,22 @@
 services:
   # =================================================================
+  #  DATABASE SERVICES
+  # =================================================================
+  # 1. DB Tunnel Service
+  # 1. DB Tunnel Service
+  db-tunnel:
+    image: kroniak/ssh-client
+    container_name: db-tunnel
+    restart: always
+    # [수정됨] 키를 복사하고 권한을 400으로 변경한 뒤 SSH 접속 시도
+    entrypoint: /bin/sh
+    command: -c "cp /root/ssh_key /root/id_rsa && chmod 400 /root/id_rsa && ssh -q -N -o ServerAliveInterval=60 -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -L 0.0.0.0:3306:10.0.20.212:3306 -L 0.0.0.0:5432:10.0.20.212:5432 -i /root/id_rsa ubuntu@141.147.154.108"
+    volumes:
+      - "${SSH_KEY_PATH}:/root/ssh_key:ro"
+    networks:
+      - sweetspot-network
+
+  # =================================================================
   #  BACKEND SERVICES
   # =================================================================
   # 3. 사용자용 API 서버 (Backend)
@@ -10,12 +27,14 @@ services:
     container_name: sweetspot-api
     restart: always
     ports:
-      - "127.0.0.1:5005:5005"
+      - "5005:5005"
     environment:
-      SPRING_PROFILES_ACTIVE: server
+      SPRING_PROFILES_ACTIVE: local # 로컬 개발용
     env_file: ./.env
     networks:
       - sweetspot-network
+    depends_on:
+      - db-tunnel
 
   # 4. 관리자용 Admin 서버 (Backend)
   admin-server:
@@ -25,9 +44,9 @@ services:
     container_name: sweetspot-admin
     restart: always
     ports:
-      - "127.0.0.1:5007:5007"
+      - "5007:5007"
     environment:
-      SPRING_PROFILES_ACTIVE: server
+      SPRING_PROFILES_ACTIVE: local # 로컬 개발용
     env_file: ./.env
     volumes:
       - ./output:/app/output
@@ -35,6 +54,8 @@ services:
       - ./logs:/app/logs
     networks:
       - sweetspot-network
+    depends_on:
+      - db-tunnel
 
   # =================================================================
   #  FRONTEND SERVICES
