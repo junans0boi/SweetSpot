@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // 로그인 페이지는 apiClient 대신 axios를 직접 사용
+import apiClient from '../apiClient'; // apiClient를 사용하도록 수정
 import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2';
-
-// ❗️ 메인 백엔드(로그인용) URL
-const MAIN_API_URL = 'http://localhost:5005/api/auth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -18,8 +15,8 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // 1. 🚀 메인 백엔드로 로그인 요청
-      const response = await axios.post(`${MAIN_API_URL}/signin`, {
+      // 1. 🚀 apiClient를 사용하여 로그인 요청
+      const response = await apiClient.post(`/auth/signin`, {
         email: email,
         password: password,
       });

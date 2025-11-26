@@ -41,7 +41,9 @@ public class DomainDataSourceConfig {
     @Primary
     @Bean(name = "domainDataSource")
     public DataSource domainDataSource(@Qualifier("domainProperties") DataSourceProperties properties) {
-        return properties.initializeDataSourceBuilder().build();
+        return properties.initializeDataSourceBuilder()
+                .driverClassName("org.postgresql.Driver")
+                .build();
     }
 
     @Primary

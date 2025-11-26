@@ -68,37 +68,33 @@ public class JsonImportService {
                 int successCount = 0;
                 int failedCount = 0;
 
-                // Read records one by one
                 while (parser.nextToken() == JsonToken.START_OBJECT) {
                     totalCount++;
-                    processedCount++;
-
-                    Map<String, String> record = parser.readValueAs(new TypeReference<>() {});
+                    Map<String, String> record = parser.readValueAs(new TypeReference<>() {
+                    });
 
                     try {
-                        // 1. Filter record
+                        // 1. 필터링 및 변환 (메모리 작업)
                         String tradeStateName = record.get("tradeStateName");
-                        if (!"영업/정상".equals(tradeStateName)) {
-                            throw new RuntimeException("영업상태가 '영업/정상'이 아님: " + tradeStateName);
-                        }
+                        if (!"영업/정상".equals(tradeStateName))
+                            continue; // 카운트 제외하거나 별도 로직
 
-                        String roadAddress = record.get("roadAddress");
-                        String jibunAddress = record.get("jibunAddress");
-                        if (!StringUtils.hasText(roadAddress) && !StringUtils.hasText(jibunAddress)) {
-                            throw new RuntimeException("도로명주소와 지번주소가 모두 없음");
-                        }
-
-                        // 2. Transform to Place entity
                         Place place = transformToPlace(record);
                         batchList.add(place);
-                        successCount++;
 
-                        // 3. Save in batches
+                        // 2. 배치 저장 (DB 작업) - 트랜잭션 단위
                         if (batchList.size() >= BATCH_SIZE) {
-                            placeRepository.saveAll(batchList);
-                            log.info("[JsonImportService] Saved a batch of {} places.", batchList.size());
-                            jobStatusService.updateStatus(jobId, String.format("처리 중... (%d건 처리)", processedCount));
-                            batchList.clear();
+                            try {
+                                placeRepository.saveAll(batchList);
+                                successCount += batchList.size(); // ✅ 저장 성공 시 한꺼번에 카운트 증가
+                                log.info("[JsonImportService] Saved a batch of {} places.", batchList.size());
+                            } catch (Exception e) {
+                                // DB 저장 실패 시
+                                failedCount += batchList.size(); // ✅ 1000개 전체 실패 처리
+                                log.error("Batch save failed: {}", e.getMessage());
+                                // 에러 로그 파일에 배치 실패 기록 남기는 로직 추가 권장
+                            }
+                            batchList.clear(); // 리스트 비우기
                         }
                     } catch (Exception e) {
                         failedCount++;
@@ -108,11 +104,16 @@ public class JsonImportService {
                     }
                 }
 
-                // Save remaining batch
                 if (!batchList.isEmpty()) {
-                    placeRepository.saveAll(batchList);
-                    log.info("[JsonImportService] Saved the final batch of {} places.", batchList.size());
+                    try {
+                        placeRepository.saveAll(batchList);
+                        successCount += batchList.size();
+                        log.info("[[JsonImportService] {} 위치의 마지막 배치 저장 완료.", batchList.size());
+                    } catch (Exception e) {
+                        failedCount += batchList.size();
+                    }
                 }
+
 
                 String finalStatus = String.format("COMPLETED: 총 %d개 중 %d개 성공, %d개 실패. (상세내용: logs/failed_records.log)",
                         totalCount, successCount, failedCount);
@@ -135,12 +136,13 @@ public class JsonImportService {
                 place.setId(Long.parseLong(idString));
             } catch (NumberFormatException e) {
                 log.warn("[JsonImportService] Invalid ID format in record, letting DB generate: {}", idString);
-                // If ID is invalid, proceed without setting it, letting the DB generate if configured.
+                // If ID is invalid, proceed without setting it, letting the DB generate if
+                // configured.
             }
         }
         place.setName(record.get("name"));
         place.setMainCategory(record.get("mainCategory"));
-        
+
         String subCategory = record.get("subCategory");
         place.setSubCategory(StringUtils.hasText(subCategory) ? subCategory : record.get("mainCategory"));
 

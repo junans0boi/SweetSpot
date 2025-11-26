@@ -35,7 +35,9 @@ public class AuthDataSourceConfig {
 
     @Bean(name = "authDataSource")
     public DataSource authDataSource(@Qualifier("authProperties") DataSourceProperties properties) {
-        return properties.initializeDataSourceBuilder().build();
+        return properties.initializeDataSourceBuilder()
+                .driverClassName("org.mariadb.jdbc.Driver")
+                .build();
     }
 
     @Bean(name = "authEntityManagerFactory")

@@ -1,8 +1,8 @@
 package com.hollywood.sweetspot.user.controller; 
 
 import lombok.RequiredArgsConstructor; 
-import com.hollywood.sweetspot.user.dto.UserInfoResponse;
-import com.hollywood.sweetspot.user.service.UserService;
+import com.hollywood.sweetspot.core.domain.user.dto.UserInfoResponse;
+import com.hollywood.sweetspot.core.domain.user.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;

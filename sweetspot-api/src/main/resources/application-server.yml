@@ -1,28 +1,28 @@
-# sweetspot-api/src/main/resources/application-server.yml
+server:
+  forward-headers-strategy: native
 
-spring:
-  datasources:
-    auth:
-      driver-class-name: org.mariadb.jdbc.Driver
-      # 서버 환경에서는 DB에 직접 연결합니다. (예: localhost 또는 DB 컨테이너 이름)
-      url: jdbc:mariadb://localhost:3306/sweetspot_auth
-      username: ${SPRING_DATASOURCE_AUTH_USERNAME} # .env 파일의 변수를 그대로 사용
-      password: ${SPRING_DATASOURCE_AUTH_PASSWORD} # .env 파일의 변수를 그대로 사용
-      jpa:
-        properties:
-          hibernate:
-            dialect: org.hibernate.dialect.MariaDBDialect
-            hbm2ddl:
-              auto: validate # 서버에서는 스키마를 자동으로 변경하지 않고 검증만 하도록 설정
-    domain:
-      driver-class-name: org.postgresql.Driver
-      # 서버 환경에서는 DB에 직접 연결합니다. (예: localhost 또는 DB 컨테이너 이름)
-      url: jdbc:postgresql://localhost:5432/sweetspot_domain
-      username: ${SPRING_DATASOURCE_DOMAIN_USERNAME} # .env 파일의 변수를 그대로 사용
-      password: ${SPRING_DATASOURCE_DOMAIN_PASSWORD} # .env 파일의 변수를 그대로 사용
-      jpa:
-        properties:
-          hibernate:
-            dialect: org.hibernate.dialect.PostgreSQLDialect
-            hbm2ddl:
-              auto: validate # 서버에서는 스키마를 자동으로 변경하지 않고 검증만 하도록 설정
+datasources:
+  auth:
+    driver-class-name: org.mariadb.jdbc.Driver
+    # 실제 서버에서는 DB VM 에 직접 붙을 거면 .env 값 그대로 쓰는 게 깔끔
+    url: ${SPRING_DATASOURCE_AUTH_URL}          # jdbc:mariadb://10.0.20.212:3306/sweetspot_auth
+    username: ${SPRING_DATASOURCE_AUTH_USERNAME}
+    password: ${SPRING_DATASOURCE_AUTH_PASSWORD}
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.MariaDBDialect
+          hbm2ddl:
+            auto: validate
+
+  domain:
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_DOMAIN_URL}        # jdbc:postgresql://10.0.20.212:5432/sweetspot_places
+    username: ${SPRING_DATASOURCE_DOMAIN_USERNAME}
+    password: ${SPRING_DATASOURCE_DOMAIN_PASSWORD}
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+          hbm2ddl:
+            auto: validate

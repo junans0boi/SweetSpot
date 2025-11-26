@@ -1,6 +1,6 @@
 // UserService.java (수정 후)
 
-package com.hollywood.sweetspot.user.service;
+package com.hollywood.sweetspot.core.domain.user.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.hollywood.sweetspot.core.domain.user.entity.User;
 import com.hollywood.sweetspot.core.domain.user.entity.Provider;
-import com.hollywood.sweetspot.user.dto.UserInfoResponse;
+import com.hollywood.sweetspot.core.domain.user.dto.UserInfoResponse;
 import com.hollywood.sweetspot.core.domain.user.repository.UserRepository;
 
 @Service

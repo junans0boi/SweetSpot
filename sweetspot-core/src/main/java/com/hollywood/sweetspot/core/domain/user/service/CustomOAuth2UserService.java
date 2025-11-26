@@ -1,4 +1,4 @@
-package com.hollywood.sweetspot.user.service;
+package com.hollywood.sweetspot.core.domain.user.service;
 
 import java.util.Collections;
 import lombok.extern.slf4j.Slf4j;

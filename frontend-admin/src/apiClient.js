@@ -2,8 +2,7 @@ import axios from 'axios';
 
 // 관리자 백엔드 전용 axios 인스턴스
 const apiClient = axios.create({
-  // Nginx가 /api/admin/ 요청을 5007 포트로 보내줍니다.
-  baseURL: '/api/admin', 
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://admin.sweetspot.kro.kr/api/admin',
 });
 
 // 1. 요청(Request) 인터셉터

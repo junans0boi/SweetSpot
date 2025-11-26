@@ -60,4 +60,9 @@ public class User {
         this.pictureUrl = pictureUrl;
         return this;
     }
+    public void updateRoles(List<Role> newRoles) {
+    this.roles.clear();
+    this.roles.addAll(newRoles);
+    // 또는 this.roles = new ArrayList<>(newRoles);
+}
 }

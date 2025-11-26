@@ -1,7 +1,7 @@
 package com.hollywood.sweetspot.config;
 
 import lombok.RequiredArgsConstructor;
-import com.hollywood.sweetspot.user.service.CustomOAuth2UserService;
+import com.hollywood.sweetspot.core.domain.user.service.CustomOAuth2UserService;
 import com.hollywood.sweetspot.core.global.security.JwtAuthenticationFilter;
 import com.hollywood.sweetspot.core.global.security.oauth2.handler.OAuth2LoginFailureHandler;
 import com.hollywood.sweetspot.core.global.security.oauth2.handler.OAuth2LoginSuccessHandler;
