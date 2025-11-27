@@ -10,7 +10,7 @@ datasources:
         hibernate:
           dialect: org.hibernate.dialect.MariaDBDialect
           hbm2ddl:
-            auto: validate
+            auto: update
 
   domain:
     driver-class-name: org.postgresql.Driver
@@ -22,7 +22,7 @@ datasources:
         hibernate:
           dialect: org.hibernate.dialect.PostgreSQLDialect
           hbm2ddl:
-            auto: validate
+            auto: update
           show-sql: false
           format_sql: false
           jdbc:

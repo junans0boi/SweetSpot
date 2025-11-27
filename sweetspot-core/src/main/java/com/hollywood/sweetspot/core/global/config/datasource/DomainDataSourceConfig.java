@@ -19,8 +19,10 @@ import javax.sql.DataSource;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        // ✅ [수정] Core 모듈 내부의 Place Repository 경로로 수정
-        basePackages = "com.hollywood.sweetspot.core.domain.place.repository", entityManagerFactoryRef = "domainEntityManagerFactory", transactionManagerRef = "domainTransactionManager")
+        // Core 모듈 내부의 Place Repository 경로로 수정
+        basePackages = {"com.hollywood.sweetspot.core.domain.place.repository", "com.hollywood.sweetspot.core.domain.review.repository"}, 
+        entityManagerFactoryRef = "domainEntityManagerFactory", 
+        transactionManagerRef = "domainTransactionManager")
 public class DomainDataSourceConfig {
 
     @Primary
@@ -52,12 +54,12 @@ public class DomainDataSourceConfig {
             @Qualifier("domainDataSource") DataSource dataSource,
             @Qualifier("domainJpaProperties") JpaProperties jpaProps) {
         EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder(
-                new org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter(), jpaProps.getProperties(), null
-        );
+                new org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter(), jpaProps.getProperties(), null);
         return builder
                 .dataSource(dataSource)
-                // ✅ [수정] Core 모듈 내부의 Place Entity 경로로 수정
-                .packages("com.hollywood.sweetspot.core.domain.place.entity")
+                // Place와 Review Entity 경로를 모두 포함
+                .packages("com.hollywood.sweetspot.core.domain.place.entity",
+                        "com.hollywood.sweetspot.core.domain.review.entity")
                 .persistenceUnit("domain")
                 .properties(jpaProps.getProperties())
                 .build();

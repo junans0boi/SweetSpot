@@ -52,7 +52,7 @@ export default function HomeScreen({ route, navigation }) {
     const [locationSearchQuery, setLocationSearchQuery] = useState('');
     const [locationResults, setLocationResults] = useState([]);
     const [isLocationLoading, setIsLocationLoading] = useState(false);
-    
+
     const mapViewRef = useRef(null);
 
     const handlePlacePress = (place) => navigation.navigate('PlaceDetail', { place });
@@ -69,51 +69,55 @@ export default function HomeScreen({ route, navigation }) {
 
     const searchLocations = async (text) => {
         setLocationSearchQuery(text);
-        if (text.length < 2) {
-            setLocationResults([]);
-            return;
-        }
-        setIsLocationLoading(true);
-        try {
-            const response = await axios.get(`https://maps.googleapis.com/maps/api/place/autocomplete/json`, {
-                params: { input: text, key: GOOGLE_PLACES_API_KEY, language: 'ko', components: 'country:KR' }
-            });
-            if (response.data.predictions) setLocationResults(response.data.predictions);
-        } catch (error) {
-            console.error("Google API Error:", error);
-            alert("위치 정보를 가져오는 데 실패했습니다.");
-        } finally {
-            setIsLocationLoading(false);
-        }
-    };
-
-    const onSelectLocation = async (place) => {
-        setIsLocationLoading(true);
-        setLocationSearchQuery(place.description);
-        setLocationResults([]);
-        try {
-            const response = await axios.get(`https://maps.googleapis.com/maps/api/place/details/json`, {
-                params: { place_id: place.place_id, key: GOOGLE_PLACES_API_KEY, language: 'ko', fields: 'geometry,address_components' }
-            });
-            const { result } = response.data;
-            if (result.geometry) {
-                const { lat, lng } = result.geometry.location;
-                const newLocation = { latitude: lat, longitude: lng };
-                const cityComponent = result.address_components.find(c => c.types.includes('locality'));
-                setUserLocation(newLocation);
-                setUserCity(cityComponent ? cityComponent.long_name : place.terms[0].value);
-                if (mapViewRef.current) {
-                    mapViewRef.current.animateToRegion({ ...newLocation, latitudeDelta: 0.05, longitudeDelta: 0.05 }, 1000);
-                }
-            }
-        } catch (error) {
-            console.error("Google Geocoding API Error:", error);
-            alert("선택한 위치의 좌표를 가져오는 데 실패했습니다.");
-        } finally {
-            setIsLocationLoading(false);
-            setLocationModalVisible(false);
+        // if (text.length < 2) {
+        //     setLocationResults([]);
+        //     return;
+        // }
+        // setIsLocationLoading(true);
+        // try {
+        //     const response = await axios.get(`https://maps.googleapis.com/maps/api/place/autocomplete/json`, {
+        //         params: { input: text, key: GOOGLE_PLACES_API_KEY, language: 'ko', components: 'country:KR' }
+        //     });
+        //     if (response.data.predictions) setLocationResults(response.data.predictions);
+        // } catch (error) {
+        //     console.error("Google API Error:", error);
+        //     alert("위치 정보를 가져오는 데 실패했습니다.");
+        // } finally {
+        //     setIsLocationLoading(false);
+        // }
+        // };
+        // 대체 로직: 로그만 출력[추후 삭제]
+        if (text.length > 0) {
+            console.log("현재 Google API 호출이 일시 중단되었습니다.");
         }
     };
+    // const onSelectLocation = async (place) => {
+    //     setIsLocationLoading(true);
+    //     setLocationSearchQuery(place.description);
+    //     setLocationResults([]);
+    //     try {
+    //         const response = await axios.get(`https://maps.googleapis.com/maps/api/place/details/json`, {
+    //             params: { place_id: place.place_id, key: GOOGLE_PLACES_API_KEY, language: 'ko', fields: 'geometry,address_components' }
+    //         });
+    //         const { result } = response.data;
+    //         if (result.geometry) {
+    //             const { lat, lng } = result.geometry.location;
+    //             const newLocation = { latitude: lat, longitude: lng };
+    //             const cityComponent = result.address_components.find(c => c.types.includes('locality'));
+    //             setUserLocation(newLocation);
+    //             setUserCity(cityComponent ? cityComponent.long_name : place.terms[0].value);
+    //             if (mapViewRef.current) {
+    //                 mapViewRef.current.animateToRegion({ ...newLocation, latitudeDelta: 0.05, longitudeDelta: 0.05 }, 1000);
+    //             }
+    //         }
+    //     } catch (error) {
+    //         console.error("Google Geocoding API Error:", error);
+    //         alert("선택한 위치의 좌표를 가져오는 데 실패했습니다.");
+    //     } finally {
+    //         setIsLocationLoading(false);
+    //         setLocationModalVisible(false);
+    //     }
+    // };
 
     const fetchCurrentLocation = async (showAlert = false) => {
         setIsLocationLoading(true);

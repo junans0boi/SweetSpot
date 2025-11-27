@@ -5,7 +5,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { openNaverMapDirections } from '../utils/navigationUtils';
 import ReviewCard from '../components/ReviewCard';
-// ✅ axios, API_BASE_URL, PlacesContext, useEffect, useState 제거
+import { getReviewsByPlace } from '../api/reviewService'; // ✅ 서비스 임포트
 
 // --- 카테고리별 정보 블록 컴포넌트들 ---
 const RestaurantInfo = ({ place }) => (
@@ -49,17 +49,31 @@ const DetailHeader = ({ name, onBack }) => (
 export default function PlaceDetailScreen() {
     const navigation = useNavigation();
     const route = useRoute();
-    
-    // ✅ 1. API 호출 대신, route.params에서 모든 정보를 가진 place 객체를 직접 받습니다.
+    const isFocused = useIsFocused(); // 화면 포커스 감지
     const { place } = route.params;
 
-    // ✅ 2. useEffect, useState, API 호출 로직을 모두 삭제합니다.
-    // const [details, setDetails] = useState(null);
-    // const [isLoading, setIsLoading] = useState(true);
-    // useEffect(() => { ... fetchDetails ... }, []);
-    // if (isLoading) { ... }
-    // if (error) { ... }
-    
+    // ✅ 리뷰 상태 관리
+    const [reviews, setReviews] = useState([]);
+    const [isLoadingReviews, setIsLoadingReviews] = useState(true);
+
+    // ✅ 리뷰 데이터 불러오기
+    const fetchReviews = async () => {
+        try {
+            setIsLoadingReviews(true);
+            const data = await getReviewsByPlace(place.id);
+            setReviews(data);
+        } catch (error) {
+            console.error("리뷰 로딩 실패:", error);
+        } finally {
+            setIsLoadingReviews(false);
+        }
+    };
+    useEffect(() => {
+        if (place?.id && isFocused) {
+            fetchReviews();
+        }
+    }, [place, isFocused]);
+
     // ✅ 3. place 객체가 없을 경우를 대비한 방어 코드
     if (!place) {
         return (
@@ -92,10 +106,15 @@ export default function PlaceDetailScreen() {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
             <DetailHeader name={place.name} onBack={() => navigation.goBack()} />
-            
-            <ScrollView style={styles.container}>
-                <Image source={{ uri: place.image }} style={styles.mainImage} placeholder={'#e0e0e0'} transition={300} />
 
+            <ScrollView style={styles.container}>
+                {/* <Image source={{ uri: place.image }} style={styles.mainImage} placeholder={'#e0e0e0'} transition={300} /> */}
+                <Image
+                    source={{ uri: 'https://placehold.co/600x400/png?text=Image+Suspended' }} // 임시 더미 이미지
+                    style={styles.mainImage}
+                    placeholder={'#e0e0e0'}
+                    transition={300}
+                />
                 <View style={styles.infoContainer}>
                     <Text style={styles.placeName}>{place.name}</Text>
                     <View style={styles.ratingContainer}><Ionicons name="star" size={16} color="#FFD700" /><Text style={styles.ratingText}>{place.rating}</Text></View>
@@ -108,12 +127,29 @@ export default function PlaceDetailScreen() {
                         <Ionicons name="navigate-outline" size={22} color="#FFFFFF" /><Text style={styles.actionButtonText}>길찾기</Text>
                     </TouchableOpacity>
                 </View>
-                
+
                 {renderCategorySpecificInfo()}
 
+                {/* ✅ 리뷰 섹션 수정 */}
                 <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>리뷰 (임시 데이터)</Text>
-                    <ReviewCard review={{ authorName: '김스윗', rating: 4, text: '분위기가 정말 좋아요!', photoUrls: [] }} />
+                    <Text style={styles.sectionTitle}>리뷰 ({reviews.length})</Text>
+
+                    {isLoadingReviews ? (
+                        <ActivityIndicator size="small" color="#FF7A00" />
+                    ) : reviews.length > 0 ? (
+                        reviews.map((review) => (
+                            <ReviewCard
+                                key={review.id}
+                                review={{
+                                    authorName: review.authorName,
+                                    rating: review.rating,
+                                    text: review.text,
+                                    photoUrls: review.photoUrls // 현재는 빈 배열
+                                }}
+                            />
+                        ))
+                    ) : (
+                        <Text style={styles.emptyReviewText}>첫 리뷰의 주인공이 되어보세요!</Text>)}
                 </View>
             </ScrollView>
 
@@ -147,5 +183,6 @@ const styles = StyleSheet.create({
     centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8f8f8' },
     errorView: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     errorText: { marginTop: 10, color: '#d32f2f', fontSize: 16, textAlign: 'center' },
+    emptyReviewText: { color: '#888', textAlign: 'center', padding: 20, fontSize: 14 }
 });
 

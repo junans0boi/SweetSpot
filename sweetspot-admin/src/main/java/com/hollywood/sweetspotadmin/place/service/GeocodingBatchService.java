@@ -35,7 +35,6 @@ import java.util.List;
 
 @Slf4j
 @Service
-@EnableScheduling
 @EnableAsync
 @RequiredArgsConstructor
 public class GeocodingBatchService {
@@ -64,7 +63,6 @@ public class GeocodingBatchService {
     private static final long API_CALL_DELAY_MS = 100;
 
     @Async
-    @Scheduled(cron = "0 0 3 * * ?") // 매일 새벽 3시 실행
     @Transactional
     public void processMissingCoordinates() {
         log.info("[GeocodingBatch] 좌표가 누락된 장소에 대한 지오코딩 시작.");

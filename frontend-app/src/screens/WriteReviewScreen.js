@@ -3,7 +3,7 @@ import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, TextInput, Scro
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-
+import { createReview } from '../api/reviewService';
 // 별점 선택 컴포넌트
 const StarRating = ({ rating, onRate }) => (
     <View style={styles.starContainer}>
@@ -49,29 +49,34 @@ export default function WriteReviewScreen() {
         }
     };
 
-    const handleSubmit = () => {
-        if (rating === 0) {
-            Alert.alert('알림', '별점을 선택해주세요.');
-            return;
+    const handleSubmit = async () => {
+        if (rating === 0) return Alert.alert('알림', '별점을 선택해주세요.');
+        if (reviewText.trim().length === 0) return Alert.alert('알림', '리뷰 내용을 입력해주세요.');
+
+        setIsSubmitting(true);
+        try {
+            // ✅ 백엔드 API 호출
+            // (참고: 현재 백엔드에는 이미지 업로드가 구현되지 않았으므로 photoUrls는 빈 리스트로 보냅니다.
+            //  이미지 업로드 기능은 추후 2단계에서 S3 연동 후 구현 예정입니다.)
+            const reviewData = {
+                placeId: placeId,
+                rating: rating,
+                text: reviewText,
+                photoUrls: [] // TODO: 이미지 업로드 구현 후 URL 리스트 전송
+            };
+
+            await createReview(reviewData);
+
+            Alert.alert('성공', '리뷰가 등록되었습니다!', [
+                { text: '확인', onPress: () => navigation.goBack() }
+            ]);
+        } catch (error) {
+            console.error(error);
+            Alert.alert('오류', '리뷰 등록에 실패했습니다. 다시 시도해주세요.');
+        } finally {
+            setIsSubmitting(false);
         }
-        if (reviewText.trim().length === 0) {
-            Alert.alert('알림', '리뷰 내용을 입력해주세요.');
-            return;
-        }
-
-        console.log('--- 리뷰 제출 데이터 ---');
-        console.log('장소 ID:', placeId);
-        console.log('별점:', rating);
-        console.log('리뷰 내용:', reviewText);
-        console.log('첨부 사진:', images);
-
-        // TODO: 추후 여기에 백엔드 API 연동 로직 추가
-
-        Alert.alert('성공', '리뷰가 성공적으로 등록되었습니다.', [
-            { text: '확인', onPress: () => navigation.goBack() }
-        ]);
     };
-
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.header}>
@@ -80,11 +85,15 @@ export default function WriteReviewScreen() {
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>리뷰 작성</Text>
                 <TouchableOpacity
-                    style={[styles.submitButton, (rating === 0 || reviewText.trim().length === 0) && styles.submitButtonDisabled]}
+                    style={[styles.submitButton, (rating === 0 || reviewText.trim().length === 0 || isSubmitting) && styles.submitButtonDisabled]}
                     onPress={handleSubmit}
-                    disabled={rating === 0 || reviewText.trim().length === 0}
+                    disabled={rating === 0 || reviewText.trim().length === 0 || isSubmitting}
                 >
-                    <Text style={styles.submitButtonText}>등록</Text>
+                    {isSubmitting ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                        <Text style={styles.submitButtonText}>등록</Text>
+                    )}
                 </TouchableOpacity>
             </View>
 

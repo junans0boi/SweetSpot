@@ -50,7 +50,8 @@ public class SecurityConfig {
                                 new AntPathRequestMatcher("/api/test"),
                                 new AntPathRequestMatcher("/api/places/**"),
                                 new AntPathRequestMatcher("/oauth2/**"),
-                                new AntPathRequestMatcher("/login/oauth2/**")
+                                new AntPathRequestMatcher("/login/oauth2/**"),
+                                new AntPathRequestMatcher("/api/reviews/place/**", "GET")
                         ).permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
