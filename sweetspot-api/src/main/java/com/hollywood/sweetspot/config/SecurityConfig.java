@@ -23,45 +23,52 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomOAuth2UserService customOAuth2UserService;
-    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
-    private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository; // ✅ 필드 추가
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final CustomOAuth2UserService customOAuth2UserService;
+        private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+        private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+        private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository; // ✅
+                                                                                                                     // 필드
+                                                                                                                     // 추가
 
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                http
+                                .csrf(AbstractHttpConfigurer::disable)
+                                // 🔻 불필요한 기본 로그인 폼과 Basic Auth 비활성화 🔻
+                                .formLogin(AbstractHttpConfigurer::disable)
+                                .httpBasic(AbstractHttpConfigurer::disable)
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                // 🔻 불필요한 기본 로그인 폼과 Basic Auth 비활성화 🔻
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
-
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                new AntPathRequestMatcher("/api/auth/**"),
-                                new AntPathRequestMatcher("/api/test"),
-                                new AntPathRequestMatcher("/api/places/**"),
-                                new AntPathRequestMatcher("/oauth2/**"),
-                                new AntPathRequestMatcher("/login/oauth2/**"),
-                                new AntPathRequestMatcher("/api/reviews/place/**", "GET")
-                        ).permitAll()
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(a -> a
-                                .authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository))
-                        .successHandler(oAuth2LoginSuccessHandler)
-                        .failureHandler(oAuth2LoginFailureHandler)
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                );
-        return http.build();
-    }
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers(
+                                                                new AntPathRequestMatcher("/api/auth/**"),
+                                                                new AntPathRequestMatcher("/api/test"),
+                                                                new AntPathRequestMatcher("/api/places/**"),
+                                                                new AntPathRequestMatcher("/oauth2/**"),
+                                                                new AntPathRequestMatcher("/login/oauth2/**"),
+                                                                new AntPathRequestMatcher("/api/reviews/place/**",
+                                                                                "GET"),
+                                                                new AntPathRequestMatcher("/error") // ✅ [추가] 에러 페이지 접근
+                                                                                                    // 허용
+                                                )
+                                                .permitAll()
+                                                .anyRequest().authenticated())
+                                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                                .oauth2Login(oauth2 -> oauth2
+                                                .authorizationEndpoint(a -> a
+                                                                .authorizationRequestRepository(
+                                                                                httpCookieOAuth2AuthorizationRequestRepository))
+                                                .successHandler(oAuth2LoginSuccessHandler)
+                                                .failureHandler(oAuth2LoginFailureHandler)
+                                                .userInfoEndpoint(userInfo -> userInfo
+                                                                .userService(customOAuth2UserService)));
+                return http.build();
+        }
 }
