@@ -7,8 +7,11 @@ import lombok.Getter;
 @Getter
 @Builder
 public class PlaceDetailDto {
+    private Long id; 
     private String name;
     private String address;
+    private String mainCategory; 
+    private String subCategory; 
     private double lat;
     private double lng;
     private Double rating;
