@@ -1,12 +1,12 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, Linking } from 'react-native';
+import React, { useState, useEffect } from 'react'; // ✅ useState, useEffect 추가
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
-import { useRoute, useNavigation } from '@react-navigation/native';
+// ✅ [수정] useIsFocused 추가
+import { useRoute, useNavigation, useIsFocused } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { openNaverMapDirections } from '../utils/navigationUtils';
 import ReviewCard from '../components/ReviewCard';
-import { getReviewsByPlace } from '../api/reviewService'; // ✅ 서비스 임포트
-
+import { getReviewsByPlace } from '../api/reviewService';
 // --- 카테고리별 정보 블록 컴포넌트들 ---
 const RestaurantInfo = ({ place }) => (
     <View style={styles.sectionContainer}>
