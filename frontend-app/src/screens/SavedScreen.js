@@ -1,22 +1,27 @@
-import React, { useContext } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';
+import React, { useContext, useCallback } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
 import PlaceCard from '../components/PlaceCard';
-
 import { PlacesContext } from '../contexts/PlacesContext';
+import { useFocusEffect } from '@react-navigation/native';
 
-// 2. props에서 중복 선언된 savedPlaces를 제거합니다.
 export default function SavedScreen({ navigation }) {
-    // 이제 Context에서만 savedPlaces와 onToggleSave를 가져옵니다.
-    const { savedPlaces, onToggleSave } = useContext(PlacesContext);
+    const { savedPlaces, onToggleSave, refreshPlaces } = useContext(PlacesContext);
+
+    // 화면에 들어올 때마다 최신 데이터 갱신 (선택 사항)
+    useFocusEffect(
+        useCallback(() => {
+            refreshPlaces();
+        }, [])
+    );
 
     const handlePlacePress = (place) => {
-        navigation.navigate('홈', { selectedPlace: place });
+        navigation.navigate('PlaceDetail', { place });
     };
 
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>저장한 장소</Text>
+                <Text style={styles.headerTitle}>찜한 장소</Text>
             </View>
             {savedPlaces && savedPlaces.length > 0 ? (
                 <FlatList
@@ -25,7 +30,7 @@ export default function SavedScreen({ navigation }) {
                         <PlaceCard
                             item={item}
                             onPress={() => handlePlacePress(item)}
-                            isSaved={true} // 이 화면의 장소는 항상 저장된 상태
+                            isSaved={true} // 여기 있는 건 다 찜한 것들임
                             onToggleSave={onToggleSave}
                         />
                     )}
@@ -34,7 +39,7 @@ export default function SavedScreen({ navigation }) {
                 />
             ) : (
                 <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyText}>아직 저장한 장소가 없어요.</Text>
+                    <Text style={styles.emptyText}>아직 찜한 장소가 없어요.</Text>
                     <Text style={styles.emptySubText}>마음에 드는 장소를 저장해보세요!</Text>
                 </View>
             )}
@@ -50,4 +55,3 @@ const styles = StyleSheet.create({
     emptyText: { fontSize: 18, fontWeight: 'bold', color: '#555' },
     emptySubText: { fontSize: 14, color: '#888', marginTop: 8 }
 });
-

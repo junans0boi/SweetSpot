@@ -1,13 +1,14 @@
 import React, { useState, useMemo, useContext } from 'react';
-import { View, Text, SafeAreaView, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native';
-import { Image } from 'expo-image'; // ✅ expo-image 사용
+import { View, Text, SafeAreaView, StyleSheet, FlatList, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { Image } from 'expo-image'; 
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { CATEGORIES_DATA } from '../data/categories';
 import PlaceCard from '../components/PlaceCard';
 import { PlacesContext } from '../contexts/PlacesContext';
+import { getDistance } from '../utils/distance'; 
 
-// 아이콘 렌더링 헬퍼
+// ... (DynamicIcon, FixedTodayRecommendation, SubCategoryFilter, SortButtons, AllCategoriesView 컴포넌트들은 기존 코드 유지) ...
 const DynamicIcon = ({ name, size, color }) => {
     const materialIcons = ['rice', 'food-drumstick', 'pot-steam', 'baguette'];
     if (materialIcons.includes(name)) {
@@ -16,7 +17,6 @@ const DynamicIcon = ({ name, size, color }) => {
     return <Ionicons name={name} size={size} color={color} />;
 };
 
-// 상단 추천 배너 (내부 컴포넌트)
 const FixedTodayRecommendation = () => {
     const DUMMY_RECOMMENDATIONS = [
         { id: 1, name: '또래오래', discount: '최대 5,000원 할인', image: 'https://picsum.photos/seed/toreore/400/300' },
@@ -45,7 +45,6 @@ const FixedTodayRecommendation = () => {
     );
 };
 
-// 세부 카테고리 필터 UI
 const SubCategoryFilter = ({ categories, activeCategory, onSelect, onShowAll, isVisible }) => (
     <View style={styles.filterContainer}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 15, flexGrow: 1 }}>
@@ -65,9 +64,8 @@ const SubCategoryFilter = ({ categories, activeCategory, onSelect, onShowAll, is
     </View>
 );
 
-// 정렬 버튼 UI
 const SortButtons = ({ activeSort, onSelectSort }) => {
-    const SORT_OPTIONS = [ { id: 'distance', title: '가까운 순'}, { id: 'rating', title: '별점 높은 순'}, { id: 'saved', title: '찜 많은 순'} ];
+    const SORT_OPTIONS = [ { id: 'distance', title: '가까운 순'}, { id: 'rating', title: '별점 높은 순'} ];
     return (
         <View style={styles.sortContainer}>
             {SORT_OPTIONS.map(opt => (
@@ -79,7 +77,6 @@ const SortButtons = ({ activeSort, onSelectSort }) => {
     );
 };
 
-// 전체보기 모달
 const AllCategoriesView = ({ isVisible, onClose, categories, onSelect }) => {
     if (!isVisible) return null;
     return (
@@ -109,7 +106,6 @@ const AllCategoriesView = ({ isVisible, onClose, categories, onSelect }) => {
     );
 };
 
-// --- 메인 화면 컴포넌트 ---
 export default function PlaceListScreen() {
     const route = useRoute();
     const navigation = useNavigation();
@@ -122,23 +118,36 @@ export default function PlaceListScreen() {
     const [activeSort, setActiveSort] = useState('distance');
     const [isModalVisible, setModalVisible] = useState(false);
 
-    // ✅ [수정] useContext에서 allPlaces를 반드시 가져와야 함 (이 부분이 에러 원인이었음)
-    const { allPlaces, savedPlaces, onToggleSave } = useContext(PlacesContext);
+    const { allPlaces, savedPlaces, onToggleSave, userLocation, refreshPlaces } = useContext(PlacesContext);
+
+    // 화면 포커스 시 데이터 갱신 (리뷰 작성 후 평점 반영 등)
+    useFocusEffect(
+        React.useCallback(() => {
+            refreshPlaces();
+        }, [])
+    );
 
     const filteredPlaces = useMemo(() => {
-        // 1. 대분류 필터링 (안전장치 추가)
-        const places = allPlaces ? allPlaces : [];
-        const basePlaces = places.filter(p => p.mainCategory === mainCategory);
+        if (!allPlaces) return [];
 
-        // 2. 소분류 필터링 (전체 선택 시 모두 반환)
-        if (activeSubCategory === '전체') {
-            return basePlaces;
+        let places = allPlaces.filter(p => p.mainCategory === mainCategory);
+
+        if (activeSubCategory !== '전체') {
+            places = places.filter(p => p.subCategory === activeSubCategory);
         }
         
-        // ✅ [수정] tags가 아니라 subCategory와 정확히 비교
-        return basePlaces.filter(p => p.subCategory === activeSubCategory);
+        return [...places].sort((a, b) => {
+            if (activeSort === 'distance' && userLocation) {
+                const distA = getDistance(userLocation.latitude, userLocation.longitude, a.lat, a.lng);
+                const distB = getDistance(userLocation.latitude, userLocation.longitude, b.lat, b.lng);
+                return distA - distB;
+            } else if (activeSort === 'rating') {
+                return (b.rating || 0) - (a.rating || 0);
+            }
+            return 0;
+        });
         
-    }, [activeSubCategory, activeSort, allPlaces, mainCategory]);
+    }, [activeSubCategory, activeSort, allPlaces, mainCategory, userLocation]);
 
     const handleSelectCategory = (tag) => {
         setActiveSubCategory(tag);
@@ -180,21 +189,29 @@ export default function PlaceListScreen() {
 
             <FlatList
                 data={filteredPlaces}
+                keyExtractor={(item) => String(item.id)}
+                initialNumToRender={10}
+                maxToRenderPerBatch={10}
+                windowSize={5}
                 renderItem={({ item }) => ( 
                     <PlaceCard 
                         item={item} 
                         onPress={() => navigation.navigate('PlaceDetail', { place: item })} 
                         isSaved={savedPlaces.some(p => p.id === item.id)} 
                         onToggleSave={onToggleSave} 
+                        showImage={false} 
                     /> 
                 )}
-                keyExtractor={(item, index) => item?.id ? item.id.toString() : index.toString()}
                 ListHeaderComponent={ListHeader}
                 ListEmptyComponent={() => ( 
                     <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>앗, 이 근처에는 결과가 없어요.</Text>
+                        <Text style={styles.emptyText}>조건에 맞는 장소가 없어요.</Text>
                     </View> 
                 )}
+                // ✅ [수정] contentContainerStyle 추가: 하단 여백 확보
+                contentContainerStyle={{ paddingBottom: 20 }}
+                // ✅ [수정] style 속성은 제거하거나 flex: 1을 줍니다. (maxHeight 제거)
+                style={{ flex: 1 }} 
             />
         </SafeAreaView>
     );

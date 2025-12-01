@@ -10,6 +10,9 @@ import SignupCompleteScreen from '../screens/SignupCompleteScreen';
 import MainTabNavigator from './MainTabNavigator';
 import PlaceDetailScreen from '../screens/PlaceDetailScreen';
 import WriteReviewScreen from '../screens/WriteReviewScreen';
+import SavedPlacesScreen from '../screens/SavedScreen';
+import MyReviewsScreen from '../screens/MyReviewsScreen';
+import EditProfileScreen from '../screens/EditProfileScreen'; // ✅ 추가
 const Stack = createStackNavigator();
 
 const AuthStack = () => (
@@ -28,6 +31,9 @@ const MainAppStack = () => (
         <Stack.Screen name="MainTabs" component={MainTabNavigator} />
         <Stack.Screen name="PlaceDetail" component={PlaceDetailScreen} />
         <Stack.Screen name="WriteReview" component={WriteReviewScreen} />
+        <Stack.Screen name="SavedPlaces" component={SavedPlacesScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="MyReviews" component={MyReviewsScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     </Stack.Navigator>
 );
 
