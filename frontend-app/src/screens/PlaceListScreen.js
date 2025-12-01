@@ -1,13 +1,14 @@
 import React, { useState, useMemo, useContext } from 'react';
-import { View, Text, SafeAreaView, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, FlatList, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { Image } from 'expo-image'; 
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { CATEGORIES_DATA } from '../data/categories';
 import PlaceCard from '../components/PlaceCard';
 import { PlacesContext } from '../contexts/PlacesContext';
-// ✅ TodayRecommendation 컴포넌트를 import 합니다.
-import TodayRecommendation from '../components/TodayRecommendation';
+import { getDistance } from '../utils/distance'; 
 
+// ... (DynamicIcon, FixedTodayRecommendation, SubCategoryFilter, SortButtons, AllCategoriesView 컴포넌트들은 기존 코드 유지) ...
 const DynamicIcon = ({ name, size, color }) => {
     const materialIcons = ['rice', 'food-drumstick', 'pot-steam', 'baguette'];
     if (materialIcons.includes(name)) {
@@ -16,7 +17,6 @@ const DynamicIcon = ({ name, size, color }) => {
     return <Ionicons name={name} size={size} color={color} />;
 };
 
-// ✅ [수정] TodayRecommendation 컴포넌트의 Image import 경로 수정
 const FixedTodayRecommendation = () => {
     const DUMMY_RECOMMENDATIONS = [
         { id: 1, name: '또래오래', discount: '최대 5,000원 할인', image: 'https://picsum.photos/seed/toreore/400/300' },
@@ -35,7 +35,6 @@ const FixedTodayRecommendation = () => {
                 contentContainerStyle={{ paddingHorizontal: 15, paddingTop: 10 }}
                 renderItem={({ item }) => (
                     <TouchableOpacity style={styles.recommendCard}>
-                        {/* ✅ 'expo-image'의 Image로 수정 */}
                         <Image source={{ uri: item.image }} style={styles.recommendImage} placeholder={'#e0e0e0'} transition={300} />
                         <Text style={styles.recommendCardTitle}>{item.name}</Text>
                         <Text style={styles.recommendCardDiscount}>{item.discount}</Text>
@@ -46,7 +45,6 @@ const FixedTodayRecommendation = () => {
     );
 };
 
-// 아이콘이 포함된 세부 카테고리 필터 UI
 const SubCategoryFilter = ({ categories, activeCategory, onSelect, onShowAll, isVisible }) => (
     <View style={styles.filterContainer}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 15, flexGrow: 1 }}>
@@ -66,9 +64,8 @@ const SubCategoryFilter = ({ categories, activeCategory, onSelect, onShowAll, is
     </View>
 );
 
-// 정렬 버튼 UI
 const SortButtons = ({ activeSort, onSelectSort }) => {
-    const SORT_OPTIONS = [ { id: 'distance', title: '가까운 순'}, { id: 'rating', title: '별점 높은 순'}, { id: 'saved', title: '찜 많은 순'} ];
+    const SORT_OPTIONS = [ { id: 'distance', title: '가까운 순'}, { id: 'rating', title: '별점 높은 순'} ];
     return (
         <View style={styles.sortContainer}>
             {SORT_OPTIONS.map(opt => (
@@ -80,7 +77,6 @@ const SortButtons = ({ activeSort, onSelectSort }) => {
     );
 };
 
-// '메뉴 전체보기' 팝업 View 컴포넌트
 const AllCategoriesView = ({ isVisible, onClose, categories, onSelect }) => {
     if (!isVisible) return null;
     return (
@@ -110,13 +106,11 @@ const AllCategoriesView = ({ isVisible, onClose, categories, onSelect }) => {
     );
 };
 
-// --- 메인 화면 컴포넌트 ---
 export default function PlaceListScreen() {
     const route = useRoute();
     const navigation = useNavigation();
     const { mainCategory } = route.params;
 
-    // ✅ 1. categoryInfo가 undefined가 되지 않도록 방어 코드 추가
     const categoryInfo = CATEGORIES_DATA[mainCategory] || { title: '목록', sub: [] };
     const subCategories = categoryInfo.sub;
 
@@ -124,19 +118,36 @@ export default function PlaceListScreen() {
     const [activeSort, setActiveSort] = useState('distance');
     const [isModalVisible, setModalVisible] = useState(false);
 
-    const { allPlaces, savedPlaces, onToggleSave } = useContext(PlacesContext);
+    const { allPlaces, savedPlaces, onToggleSave, userLocation, refreshPlaces } = useContext(PlacesContext);
+
+    // 화면 포커스 시 데이터 갱신 (리뷰 작성 후 평점 반영 등)
+    useFocusEffect(
+        React.useCallback(() => {
+            refreshPlaces();
+        }, [])
+    );
 
     const filteredPlaces = useMemo(() => {
-        // ✅ 2. '전체' 탭일 경우, mainCategory가 일치하는 장소만 필터링
-        const basePlaces = allPlaces.filter(p => p.mainCategory === mainCategory);
+        if (!allPlaces) return [];
 
-        if (activeSubCategory === '전체') {
-            return basePlaces;
+        let places = allPlaces.filter(p => p.mainCategory === mainCategory);
+
+        if (activeSubCategory !== '전체') {
+            places = places.filter(p => p.subCategory === activeSubCategory);
         }
-        // ✅ 3. 세부 탭일 경우, basePlaces에서 추가로 필터링
-        return basePlaces.filter(p => p.tags && p.tags.includes(activeSubCategory));
         
-    }, [activeSubCategory, activeSort, allPlaces, mainCategory]);
+        return [...places].sort((a, b) => {
+            if (activeSort === 'distance' && userLocation) {
+                const distA = getDistance(userLocation.latitude, userLocation.longitude, a.lat, a.lng);
+                const distB = getDistance(userLocation.latitude, userLocation.longitude, b.lat, b.lng);
+                return distA - distB;
+            } else if (activeSort === 'rating') {
+                return (b.rating || 0) - (a.rating || 0);
+            }
+            return 0;
+        });
+        
+    }, [activeSubCategory, activeSort, allPlaces, mainCategory, userLocation]);
 
     const handleSelectCategory = (tag) => {
         setActiveSubCategory(tag);
@@ -145,7 +156,6 @@ export default function PlaceListScreen() {
 
     const ListHeader = () => (
         <>
-            {/* ✅ 4. TodayRecommendation 대신 FixedTodayRecommendation 호출 */}
             <FixedTodayRecommendation />
             <View style={{height: 8, backgroundColor: '#f0f0f0'}} />
             <SortButtons activeSort={activeSort} onSelectSort={setActiveSort} />
@@ -161,7 +171,6 @@ export default function PlaceListScreen() {
                 <Text style={styles.headerTitle}>{categoryInfo.title}</Text>
             </View>
 
-            {/* zIndex를 사용하여 FlatList 스크롤 시 팝업이 위로 올라오게 함 */}
             <View style={{ zIndex: 10 }}>
                 <SubCategoryFilter
                     categories={subCategories}
@@ -180,16 +189,34 @@ export default function PlaceListScreen() {
 
             <FlatList
                 data={filteredPlaces}
-                renderItem={({ item }) => ( <PlaceCard item={item} onPress={() => navigation.navigate('PlaceDetail', { place: item })} isSaved={savedPlaces.some(p => p.id === item.id)} onToggleSave={onToggleSave} /> )}
-                // ✅ 5. [수정] id가 없는 항목도 index로 처리하여 충돌 방지
-                keyExtractor={(item, index) => item?.id ? item.id.toString() : index.toString()}
+                keyExtractor={(item) => String(item.id)}
+                initialNumToRender={10}
+                maxToRenderPerBatch={10}
+                windowSize={5}
+                renderItem={({ item }) => ( 
+                    <PlaceCard 
+                        item={item} 
+                        onPress={() => navigation.navigate('PlaceDetail', { place: item })} 
+                        isSaved={savedPlaces.some(p => p.id === item.id)} 
+                        onToggleSave={onToggleSave} 
+                        showImage={false} 
+                    /> 
+                )}
                 ListHeaderComponent={ListHeader}
-                ListEmptyComponent={() => ( <View style={styles.emptyContainer}><Text style={styles.emptyText}>앗, 이 근처에는 결과가 없어요.</Text></View> )}
+                ListEmptyComponent={() => ( 
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyText}>조건에 맞는 장소가 없어요.</Text>
+                    </View> 
+                )}
+                // ✅ [수정] contentContainerStyle 추가: 하단 여백 확보
+                contentContainerStyle={{ paddingBottom: 20 }}
+                // ✅ [수정] style 속성은 제거하거나 flex: 1을 줍니다. (maxHeight 제거)
+                style={{ flex: 1 }} 
             />
         </SafeAreaView>
     );
 }
-// --- 스타일 시트 ---
+
 const styles = StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: '#fff' },
     header: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 20 },
@@ -224,4 +251,3 @@ const styles = StyleSheet.create({
     modalItemIconBg: { width: 54, height: 54, borderRadius: 27, backgroundColor: '#f5f5f5', justifyContent: 'center', alignItems: 'center' },
     modalItemText: { marginTop: 8, fontSize: 12 },
 });
-

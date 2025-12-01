@@ -1,40 +1,25 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, Linking } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ActivityIndicator, FlatList, Alert } from 'react-native';
 import { Image } from 'expo-image';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useIsFocused } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { openNaverMapDirections } from '../utils/navigationUtils';
 import ReviewCard from '../components/ReviewCard';
-import { getReviewsByPlace } from '../api/reviewService'; // ✅ 서비스 임포트
+import { getReviewsByPlace, deleteReview } from '../api/reviewService';
 
-// --- 카테고리별 정보 블록 컴포넌트들 ---
-const RestaurantInfo = ({ place }) => (
-    <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>운영 시간</Text>
-        <Text style={styles.infoText}>매일 09:00 - 22:00 (임시 데이터)</Text>
-    </View>
-);
-const PCBangInfo = ({ info }) => (
-    <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>주요 정보</Text>
-        <View style={styles.infoRow}><Ionicons name="desktop-outline" size={20} color="#555" /><Text style={styles.infoText}>그래픽카드: {info.spec}</Text></View>
-        <View style={styles.infoRow}><Ionicons name="people-outline" size={20} color="#555" /><Text style={styles.infoText}>총 좌석: {info.seatCount}석</Text></View>
-        <View style={styles.infoRow}><Ionicons name="fast-food-outline" size={20} color="#555" /><Text style={styles.infoText}>{info.hasFood ? '음식 판매' : '음식 미판매'}</Text></View>
-    </View>
-);
-const CinemaInfo = ({ info }) => (
-    <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>현재 상영작</Text>
-        {info.nowPlaying.map(movie => (
-            <View key={movie} style={styles.infoRow}>
-                <Ionicons name="film-outline" size={20} color="#555" />
-                <Text style={styles.infoText}>{movie}</Text>
-            </View>
-        ))}
-    </View>
-);
-
-// --- 헤더 컴포넌트 ---
+// 태그 스타일 추가
+const TagList = ({ tags }) => {
+    if (!tags || tags.length === 0) return null;
+    return (
+        <View style={styles.tagRow}>
+            {tags.map((tag, index) => (
+                <View key={index} style={styles.tagBadge}>
+                    <Text style={styles.tagText}>#{tag}</Text>
+                </View>
+            ))}
+        </View>
+    );
+};
 const DetailHeader = ({ name, onBack }) => (
     <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
@@ -45,113 +30,191 @@ const DetailHeader = ({ name, onBack }) => (
     </View>
 );
 
-// --- 메인 상세 화면 ---
+// 장소 상세 정보를 보여주는 헤더 컴포넌트
+const PlaceInfoSection = ({ place }) => {
+    const renderCategorySpecificInfo = () => {
+        if (place.mainCategory === '맛집' || place.mainCategory === '카페') {
+            return (
+                <View style={styles.sectionContainer}>
+                    <Text style={styles.sectionTitle}>운영 시간</Text>
+                    <Text style={styles.infoText}>매일 09:00 - 22:00 (임시 데이터)</Text>
+                </View>
+            );
+        }
+        return null;
+    };
+
+    return (
+        <View>
+            <Image
+                source={{ uri: (place.photoUrls && place.photoUrls.length > 0) ? place.photoUrls[0] : null }}
+                style={styles.mainImage}
+                placeholder={'#e0e0e0'}
+                transition={300}
+            />
+
+            <View style={styles.infoContainer}>
+                <Text style={styles.placeName}>{place.name}</Text>
+
+                <View style={styles.ratingRow}>
+                    <Ionicons name="star" size={18} color="#FFD700" />
+                    <Text style={styles.ratingText}>{place.rating ? place.rating.toFixed(1) : '0.0'}</Text>
+                    <Text style={styles.categoryText}>· {place.mainCategory}</Text>
+                </View>
+
+                {/* [추가] 태그 리스트 표시 */}
+                <TagList tags={place.tags} />
+
+                <View style={styles.addressRow}>
+                    <Ionicons name="location-outline" size={18} color="#666" />
+                    <Text style={styles.addressText}>{place.address}</Text>
+                </View>
+            </View>
+
+            {/* ... 길찾기 버튼 및 기타 정보 (기존 동일) ... */}
+            <View style={styles.actionContainer}>
+                <TouchableOpacity style={styles.actionButton} onPress={() => openNaverMapDirections(place.lat, place.lng, place.name)}>
+                    <Ionicons name="navigate-outline" size={22} color="#FFFFFF" />
+                    <Text style={styles.actionButtonText}>길찾기</Text>
+                </TouchableOpacity>
+            </View>
+
+            {renderCategorySpecificInfo()}
+
+            <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>리뷰</Text>
+            </View>
+        </View>
+    );
+};
+
 export default function PlaceDetailScreen() {
     const navigation = useNavigation();
     const route = useRoute();
-    const isFocused = useIsFocused(); // 화면 포커스 감지
+    const isFocused = useIsFocused();
     const { place } = route.params;
 
-    // ✅ 리뷰 상태 관리
     const [reviews, setReviews] = useState([]);
-    const [isLoadingReviews, setIsLoadingReviews] = useState(true);
+    const [page, setPage] = useState(0);
+    const [isLastPage, setIsLastPage] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isFetchingMore, setIsFetchingMore] = useState(false);
 
-    // ✅ 리뷰 데이터 불러오기
-    const fetchReviews = async () => {
+    // 리뷰 데이터 불러오기
+    const fetchReviews = async (pageNum, isRefresh = false) => {
         try {
-            setIsLoadingReviews(true);
-            const data = await getReviewsByPlace(place.id);
-            setReviews(data);
+            if (isRefresh) setIsLoading(true);
+            else setIsFetchingMore(true);
+
+            console.log(`📥 리뷰 요청: page=${pageNum}, id=${place.id}`);
+            const data = await getReviewsByPlace(place.id, pageNum, 10);
+
+            console.log("📦 리뷰 응답 데이터:", data); // 디버깅용 로그
+
+            // [핵심 수정] 데이터 구조 확인 및 방어 코드 추가
+            let newReviews = [];
+            let last = true;
+
+            if (data && Array.isArray(data.content)) {
+                // 1. 정상적인 Page 객체인 경우 ({ content: [...], last: ... })
+                newReviews = data.content;
+                last = data.last;
+            } else if (Array.isArray(data)) {
+                // 2. 만약 Page가 아니라 List(배열)로 온 경우 (백엔드 구버전 호환)
+                newReviews = data;
+                last = true; // 배열로 오면 페이징 정보가 없으므로 마지막으로 간주
+            } else {
+                // 3. 데이터가 없거나 이상한 경우
+                console.warn("⚠️ 리뷰 데이터 형식이 예상과 다릅니다:", data);
+                newReviews = [];
+            }
+
+            if (isRefresh) {
+                setReviews(newReviews);
+            } else {
+                // [수정] 안전하게 스프레드 연산 사용 (빈 배열이라도 에러 안 남)
+                setReviews(prev => [...prev, ...newReviews]);
+            }
+
+            setIsLastPage(last);
+            setPage(pageNum);
+
         } catch (error) {
             console.error("리뷰 로딩 실패:", error);
         } finally {
-            setIsLoadingReviews(false);
+            setIsLoading(false);
+            setIsFetchingMore(false);
         }
     };
+
     useEffect(() => {
         if (place?.id && isFocused) {
-            fetchReviews();
+            fetchReviews(0, true);
         }
     }, [place, isFocused]);
 
-    // ✅ 3. place 객체가 없을 경우를 대비한 방어 코드
-    if (!place) {
-        return (
-            <SafeAreaView style={styles.centerContainer}>
-                <DetailHeader name="오류" onBack={() => navigation.goBack()} />
-                <View style={styles.errorView}>
-                    <Ionicons name="alert-circle-outline" size={50} color="#888" />
-                    <Text style={styles.errorText}>장소 정보를 불러오지 못했습니다.</Text>
-                </View>
-            </SafeAreaView>
-        );
-    }
-
-    const renderCategorySpecificInfo = () => {
-        switch (place.mainCategory) {
-            case '맛집':
-            case '카페':
-                return <RestaurantInfo place={place} />;
-            case '놀거리':
-                if (place.pcbangInfo) return <PCBangInfo info={place.pcbangInfo} />;
-                return null;
-            case '문화/관광':
-                if (place.cinemaInfo) return <CinemaInfo info={place.cinemaInfo} />;
-                return null;
-            default:
-                return null;
+    const handleLoadMore = () => {
+        if (!isLastPage && !isFetchingMore && !isLoading) {
+            fetchReviews(page + 1);
         }
     };
+    // [추가] 리뷰 삭제 핸들러
+    const handleDeleteReview = (reviewId) => {
+        Alert.alert(
+            "리뷰 삭제",
+            "정말 이 리뷰를 삭제하시겠습니까?",
+            [
+                { text: "취소", style: "cancel" },
+                {
+                    text: "삭제",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            await deleteReview(reviewId);
+                            Alert.alert("삭제 완료", "리뷰가 삭제되었습니다.");
+                            fetchReviews(0, true); // 목록 새로고침
+                        } catch (error) {
+                            Alert.alert("오류", "리뷰 삭제에 실패했습니다.");
+                            console.error(error);
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    // [추가] 리뷰 수정 핸들러 (작성 화면으로 이동)
+    const handleEditReview = (review) => {
+        navigation.navigate('WriteReview', {
+            placeName: place.name,
+            placeId: place.id,
+            review: review // 수정할 리뷰 객체 전달
+        });
+    };
+
+    if (!place) return null;
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
             <DetailHeader name={place.name} onBack={() => navigation.goBack()} />
 
-            <ScrollView style={styles.container}>
-                {/* <Image source={{ uri: place.image }} style={styles.mainImage} placeholder={'#e0e0e0'} transition={300} /> */}
-                <Image
-                    source={{ uri: 'https://placehold.co/600x400/png?text=Image+Suspended' }} // 임시 더미 이미지
-                    style={styles.mainImage}
-                    placeholder={'#e0e0e0'}
-                    transition={300}
-                />
-                <View style={styles.infoContainer}>
-                    <Text style={styles.placeName}>{place.name}</Text>
-                    <View style={styles.ratingContainer}><Ionicons name="star" size={16} color="#FFD700" /><Text style={styles.ratingText}>{place.rating}</Text></View>
-                    <View style={styles.infoRow}><Ionicons name="location-outline" size={20} color="#555" /><Text style={styles.infoText}>{place.address}</Text></View>
-                    {/* {place.website && ( ... )} */}
-                </View>
+            <FlatList
+                data={reviews}
+                keyExtractor={(item) => String(item.id)}
+                renderItem={({ item }) => (
+                    <ReviewCard
+                        review={item}
+                        onEdit={handleEditReview}    // 연결
+                        onDelete={handleDeleteReview} // 연결
+                    />
+                )}
 
-                <View style={styles.actionContainer}>
-                    <TouchableOpacity style={styles.actionButton} onPress={() => openNaverMapDirections(place.coordinate.latitude, place.coordinate.longitude, place.name)}>
-                        <Ionicons name="navigate-outline" size={22} color="#FFFFFF" /><Text style={styles.actionButtonText}>길찾기</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {renderCategorySpecificInfo()}
-
-                {/* ✅ 리뷰 섹션 수정 */}
-                <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>리뷰 ({reviews.length})</Text>
-
-                    {isLoadingReviews ? (
-                        <ActivityIndicator size="small" color="#FF7A00" />
-                    ) : reviews.length > 0 ? (
-                        reviews.map((review) => (
-                            <ReviewCard
-                                key={review.id}
-                                review={{
-                                    authorName: review.authorName,
-                                    rating: review.rating,
-                                    text: review.text,
-                                    photoUrls: review.photoUrls // 현재는 빈 배열
-                                }}
-                            />
-                        ))
-                    ) : (
-                        <Text style={styles.emptyReviewText}>첫 리뷰의 주인공이 되어보세요!</Text>)}
-                </View>
-            </ScrollView>
+                ListHeaderComponent={<PlaceInfoSection place={place} />}
+                ListEmptyComponent={!isLoading && (<Text style={styles.emptyReviewText}>첫 리뷰의 주인공이 되어보세요!</Text>)}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={isFetchingMore && <ActivityIndicator size="small" color="#FF7A00" style={{ margin: 20 }} />}
+            />
 
             <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('WriteReview', { placeName: place.name, placeId: place.id })}>
                 <Ionicons name="create-outline" size={28} color="#fff" />
@@ -161,8 +224,6 @@ export default function PlaceDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-    safeArea: { flex: 1, backgroundColor: '#fff' },
-    container: { flex: 1 },
     header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, paddingHorizontal: 15, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
     backButton: { padding: 5 },
     headerTitle: { fontSize: 17, fontWeight: '600', flex: 1, textAlign: 'center', marginHorizontal: 10 },
@@ -170,10 +231,21 @@ const styles = StyleSheet.create({
     infoContainer: { padding: 20 },
     placeName: { fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
     ratingContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
-    ratingText: { marginLeft: 5, fontSize: 16, fontWeight: 'bold' },
+    ratingRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+    ratingText: { marginLeft: 4, fontSize: 16, fontWeight: 'bold', color: '#333' },
+    categoryText: { marginLeft: 8, fontSize: 14, color: '#888' },
+    
+    tagRow: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12 },
+    tagBadge: { 
+        backgroundColor: '#F0F0F0', borderRadius: 4, 
+        paddingHorizontal: 8, paddingVertical: 4, 
+        marginRight: 6, marginBottom: 6 
+    },
+    tagText: { color: '#555', fontSize: 12, fontWeight: '500' },
+    addressRow: { flexDirection: 'row', alignItems: 'center' },
+    addressText: { marginLeft: 4, fontSize: 15, color: '#555', flex: 1 },
     infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
     infoText: { marginLeft: 10, fontSize: 16, color: '#333', flex: 1 },
-    linkText: { color: '#007AFF' },
     actionContainer: { flexDirection: 'row', justifyContent: 'center', paddingVertical: 15, paddingHorizontal: 20, borderTopWidth: 8, borderTopColor: '#f0f0f0' },
     actionButton: { flexDirection: 'row', backgroundColor: '#00C73C', paddingVertical: 12, paddingHorizontal: 30, borderRadius: 25, alignItems: 'center', justifyContent: 'center' },
     actionButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: 'bold', marginLeft: 8 },
@@ -185,4 +257,3 @@ const styles = StyleSheet.create({
     errorText: { marginTop: 10, color: '#d32f2f', fontSize: 16, textAlign: 'center' },
     emptyReviewText: { color: '#888', textAlign: 'center', padding: 20, fontSize: 14 }
 });
-

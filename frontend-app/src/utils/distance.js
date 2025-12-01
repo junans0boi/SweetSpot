@@ -1,9 +1,28 @@
-// 거리 계산 함수
-export function getDistance(lat1, lon1, lat2, lon2) {
-    if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
-    const R = 6371; // 지구 반지름 (km)
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 0.5 - Math.cos(dLat) / 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
-    return R * 2 * Math.asin(Math.sqrt(a));
-}
+export const getDistance = (lat1, lon1, lat2, lon2) => {
+    if ((lat1 == lat2) && (lon1 == lon2)) {
+        return 0;
+    } else {
+        const radlat1 = Math.PI * lat1 / 180;
+        const radlat2 = Math.PI * lat2 / 180;
+        const theta = lon1 - lon2;
+        const radtheta = Math.PI * theta / 180;
+        let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+        if (dist > 1) {
+            dist = 1;
+        }
+        dist = Math.acos(dist);
+        dist = dist * 180 / Math.PI;
+        dist = dist * 60 * 1.1515;
+        dist = dist * 1.609344; // 킬로미터 단위 변환
+        return dist;
+    }
+};
+
+// 사람이 보기 좋은 포맷으로 변환 (예: 500m, 1.2km)
+export const formatDistance = (km) => {
+    if (!km) return '';
+    if (km < 1) {
+        return `${Math.round(km * 1000)}m`;
+    }
+    return `${km.toFixed(1)}km`;
+};

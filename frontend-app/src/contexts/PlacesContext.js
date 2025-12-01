@@ -1,11 +1,10 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { Alert } from 'react-native';
-import { GOOGLE_PLACES_API_KEY as API_KEY } from '@env';
 import * as Location from 'expo-location';
-
-// ✅ 1. axios, API_BASE_URL 삭제
-// ✅ 2. 우리가 만든 작은 목업 파일을 직접 import 합니다.
-import mockPlacesData from '../data/places.mock.json';
+import { getNearbyPlaces } from '../api/placeService';
+import axios from 'axios';
+import API_BASE_URL from '../config/api';
+import * as SecureStore from 'expo-secure-store';
 
 export const PlacesContext = createContext();
 
@@ -13,51 +12,120 @@ export const PlacesProvider = ({ children }) => {
     const [savedPlaces, setSavedPlaces] = useState([]);
     const [userLocation, setUserLocation] = useState(null);
     const [userCity, setUserCity] = useState(null);
-
-    // ✅ 3. allPlaces의 초기값을 목업 데이터로 바로 설정합니다.
-    const [allPlaces, setAllPlaces] = useState(mockPlacesData);
+    const [allPlaces, setAllPlaces] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const handleToggleSave = (place) => {
-        setSavedPlaces(prev => {
-            const isSaved = prev.some(p => p.id === place.id);
-            if (isSaved) {
-                return prev.filter(p => p.id !== place.id);
-            } else {
-                return [...prev, place];
+    // ✅ [수정] 찜 토글 (디버깅 로그 추가)
+    const handleToggleSave = async (place) => {
+        // 1. 유효성 검사
+        if (!place || !place.id) {
+            console.error("❌ 찜 오류: 장소 ID가 없습니다.", place);
+            Alert.alert("오류", "장소 정보를 찾을 수 없습니다.");
+            return;
+        }
+
+        try {
+            const token = await SecureStore.getItemAsync('accessToken');
+            if (!token) {
+                Alert.alert("로그인 필요", "찜 기능을 사용하려면 로그인이 필요합니다.");
+                return;
             }
-        });
+
+            console.log(`❤️ 찜 요청: ID=${place.id}, Token 존재함`);
+
+            // 2. 요청 전송
+            const response = await axios.post(`${API_BASE_URL}/api/places/${place.id}/like`, {}, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            const isLiked = response.data;
+            console.log(`✅ 찜 결과: ${isLiked}`);
+
+            // 3. 상태 업데이트
+            setSavedPlaces(prev => {
+                if (isLiked) {
+                    if (prev.some(p => p.id === place.id)) return prev;
+                    return [...prev, place];
+                } else {
+                    return prev.filter(p => p.id !== place.id);
+                }
+            });
+        } catch (error) {
+            console.error("❌ 찜 토글 실패:", error.message);
+            if (error.response) {
+                console.error("서버 응답:", error.response.status, error.response.data);
+                if (error.response.status === 400) {
+                    Alert.alert("요청 오류", "잘못된 요청입니다. (400)");
+                } else if (error.response.status === 401) {
+                    Alert.alert("인증 실패", "로그인이 만료되었습니다.");
+                }
+            }
+        }
     };
 
-    // ✅ 4. fetchNearbyPlaces 함수를 완전히 제거합니다. (더 이상 필요 없음)
+    // ✅ [수정] 찜 목록 로딩 (에러 로그 강화)
+    const loadMyLikes = async () => {
+        try {
+            const token = await SecureStore.getItemAsync('accessToken');
+            if (!token) return;
+
+            const response = await axios.get(`${API_BASE_URL}/api/places/my-likes`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setSavedPlaces(response.data);
+        } catch (error) {
+            console.log("⚠️ 찜 목록 로드 실패:", error.message);
+        }
+    };
+
+    // 주변 장소 로딩
+    const loadNearbyPlaces = async (lat, lng) => {
+        try {
+            // console.log(`📡 API 호출: lat=${lat}, lng=${lng}`);
+            const data = await getNearbyPlaces(lat, lng, 3000);
+            setAllPlaces(data);
+        } catch (error) {
+            console.error("장소 데이터 로드 실패:", error);
+        }
+    };
 
     useEffect(() => {
         const loadInitialData = async () => {
             setIsLoading(true);
             try {
-                // ✅ 5. 거대한 JSON 로딩/파싱/API 호출 로직이 모두 사라지고,
-                //    오직 '현재 위치'를 가져오는 작업만 남깁니다.
-                /* let { status } = await Location.requestForegroundPermissionsAsync();
-                let location;
-                if (status !== 'granted') {
-                    location = { latitude: 37.3615, longitude: 126.9318 }; // 기본 위치 (산본)
-                    setUserCity('군포시');
-                } else {
-                    const loc = await Location.getCurrentPositionAsync({});
-                    location = loc.coords;
-                    let address = await Location.reverseGeocodeAsync(location);
-                    if (address.length > 0) setUserCity(address[0].city);
+                let { status } = await Location.requestForegroundPermissionsAsync();
+                let location = { latitude: 37.5665, longitude: 126.9780 };
+                let city = '서울 중구';
+
+                if (status === 'granted') {
+                    try {
+                        const locPromise = Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+                        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
+                        const loc = await Promise.race([locPromise, timeoutPromise]);
+                        location = loc.coords;
+                        
+                        const address = await Location.reverseGeocodeAsync(location);
+                        if (address.length > 0) {
+                            city = `${address[0].city || ''} ${address[0].district || ''}`.trim();
+                        }
+                    } catch (e) { /* 무시 */ }
                 }
+
                 setUserLocation(location);
-                */
-                setUserLocation({ latitude: 37.3615, longitude: 126.9318 });
-                setUserCity('경기 군포');
+                setUserCity(city);
+
+                await Promise.all([
+                    loadNearbyPlaces(location.latitude, location.longitude),
+                    loadMyLikes()
+                ]);
+
             } catch (error) {
                 console.error("초기 데이터 로딩 실패:", error);
             } finally {
-                setIsLoading(false); // 위치 정보만 가져오면 로딩 끝!
+                setIsLoading(false);
             }
         };
+
         loadInitialData();
     }, []);
 
@@ -67,14 +135,16 @@ export const PlacesProvider = ({ children }) => {
             onToggleSave: handleToggleSave,
             userLocation,
             userCity,
-            allPlaces, // ✅ 항상 목업 데이터를 반환
+            allPlaces,
             setUserLocation,
             setUserCity,
-            GOOGLE_PLACES_API_KEY: API_KEY,
             isLoading,
+            refreshPlaces: () => {
+                if (userLocation) loadNearbyPlaces(userLocation.latitude, userLocation.longitude);
+                loadMyLikes();
+            }
         }}>
             {children}
         </PlacesContext.Provider>
     );
 };
-
