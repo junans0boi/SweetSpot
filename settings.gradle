@@ -1,0 +1,6 @@
+rootProject.name = 'sweetspot'
+
+// 백엔드 모듈 등록
+include 'sweetspot-core'
+include 'sweetspot-api'
+include 'sweetspot-admin'

@@ -1,0 +1,31 @@
+# datasources를 최상위 레벨(들여쓰기 없음)로 설정해야 합니다.
+datasources:
+  auth:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: ${SPRING_DATASOURCE_AUTH_URL}
+    username: ${SPRING_DATASOURCE_AUTH_USERNAME}
+    password: ${SPRING_DATASOURCE_AUTH_PASSWORD}
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.MariaDBDialect
+          hbm2ddl:
+            auto: update
+
+  domain:
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_DOMAIN_URL}
+    username: ${SPRING_DATASOURCE_DOMAIN_USERNAME}
+    password: ${SPRING_DATASOURCE_DOMAIN_PASSWORD}
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+          hbm2ddl:
+            auto: update
+          show-sql: false
+          format_sql: false
+          jdbc:
+            batch_size: 1000
+          order_inserts: true
+          order_updates: true

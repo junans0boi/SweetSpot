@@ -1,0 +1,10 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            redirect-uri: "https://sweetspot.kro.kr/login/oauth2/code/google"
+
+front:
+  base-url: https://sweetspot.kro.kr

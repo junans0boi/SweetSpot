@@ -1,23 +1,70 @@
-# .env 파일 - 민감 정보는 절대로 Git에 올리지 않습니다.
+# ==================================
+# 1. 민감 정보 (절대 커밋 금지)
+# ==================================
 .env
+.env.*
+*.key
+*.p12
+*.jks
 
-# DB 데이터 - 로컬 환경마다 다르고 용량이 큽니다.
-/data/
-
-# IDE 설정 파일
+# ==================================
+# 2. OS 및 IDE 설정 파일
+# ==================================
+.DS_Store
+Thumbs.db
 .idea/
+.vscode/
 *.iml
-*~
-*.swp
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+.factorypath
 
-# 빌드 결과물 및 캐시
-/backend/build/
-/backend/.gradle/
-build/
+# ==================================
+# 3. Java & Gradle 빌드 결과물
+# ==================================
+# Gradle 캐시 및 빌드 폴더
 .gradle/
+build/
+out/
 
-# 로그 파일
+# VS Code/Eclipse 자동 컴파일 폴더 (질문하신 bin 폴더 차단)
+bin/
+**/bin/
+
+# Gradle Wrapper (선택사항: 보통은 커밋하지만 용량을 줄이려면 무시)
+# gradle/
+# gradlew
+# gradlew.bat
+
+# ==================================
+# 4. 데이터 및 로그 (대용량 파일 차단)
+# ==================================
+csv-data/
+output/
+logs/
 *.log
 
-# macOS 시스템 파일
-.DS_Store
+# 임시 파일들
+backend/
+SweetSpot_Backend/
+temp.csv
+scripts/
+
+# ==================================
+# 5. Frontend (Node.js / React Native)
+# ==================================
+node_modules/
+dist/
+.expo/
+web-build/
+.npm/
+
+# Mobile Build Outputs
+android/app/build/
+android/.gradle/
+ios/Pods/
+ios/build/
+data/ 

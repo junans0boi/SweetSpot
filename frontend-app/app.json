@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "frontend",
+    "slug": "frontend",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*",
+      "places.json"
+    ],
+    "ios": {
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "위치 정보를 사용하여 현재 위치를 지도에 표시합니다."
+      },
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hollywood.sweetspot",
+      "config": {
+        "googleMapsApiKey": "AIzaSyCS8EMjxBPZixq7F7iKaPa5Y3DaLE2RZmY"
+      }
+    },
+    "android": {
+      "permissions": [
+        "ACCESS_FINE_LOCATION"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.hollywood.sweetspot",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCS8EMjxBPZixq7F7iKaPa5Y3DaLE2RZmY"
+        }
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-font",
+      "expo-asset"
+    ]
+  }
+}

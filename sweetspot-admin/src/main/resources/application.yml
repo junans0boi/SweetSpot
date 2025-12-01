@@ -1,0 +1,47 @@
+server:
+  port: 5007
+  connection-timeout: 1800s
+
+spring:
+  jpa:
+    open-in-view: false
+  config:
+    import: optional:file:.env[.properties]
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 2GB
+      max-request-size: 2GB
+  # 여기에 datasources가 있으면 안됩니다!
+
+datasources:
+  auth:
+    url: ${SPRING_DATASOURCE_AUTH_URL}
+    username: ${SPRING_DATASOURCE_AUTH_USERNAME}
+    password: ${SPRING_DATASOURCE_AUTH_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.MariaDBDialect
+  
+  # (참고) 로그 설정 등 나머지는 유지
+  logging:
+    level:
+      org.hibernate.SQL: debug
+      org.hibernate.orm.jdbc.bind: trace
+      org.hibernate.hbm2ddl: debug
+
+csv:
+  directory-path: /app/csv-data # Docker 경로로 수정 권장 (/home/ubuntu... 는 로컬 경로임)
+
+jwt:
+  secret: ${JWT_SECRET}
+
+google:
+  api:
+    key: ${GOOGLE_API_KEY}
+    url: "https://maps.googleapis.com/maps/api/geocode/json"
+
+project:
+  root-path: /app

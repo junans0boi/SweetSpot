@@ -1,73 +1,61 @@
 services:
-  backend:
+  # =================================================================
+  #  BACKEND SERVICES
+  # =================================================================
+  # 3. 사용자용 API 서버 (Backend)
+  api-server:
     build:
-      context: ./backend
-    container_name: sweetspot-backend
+      context: .
+      dockerfile: sweetspot-api/Dockerfile
+    container_name: sweetspot-api
     restart: always
+    ports:
+      - "127.0.0.1:5005:5005"
+    environment:
+      SPRING_PROFILES_ACTIVE: server
     env_file: ./.env
-    depends_on:
-      - auth-db
-      - domain-db
+    networks:
+      - sweetspot-network
+    volumes:
+      # 호스트의 uploads 폴더를 컨테이너의 /app/uploads 와 연결
+      - ./uploads:/app/uploads
+
+  # 4. 관리자용 Admin 서버 (Backend)
+  admin-server:
+    build:
+      context: .
+      dockerfile: sweetspot-admin/Dockerfile
+    container_name: sweetspot-admin
+    restart: always
+    ports:
+      - "127.0.0.1:5007:5007"
     environment:
-      - SPRING_DATASOURCE_AUTH_URL=jdbc:mariadb://auth-db:3306/sweetspot_auth?useUnicode=true&characterEncoding=utf8
-      - SPRING_DATASOURCE_AUTH_USERNAME=${MariaDB_DB_USER}
-      - SPRING_DATASOURCE_AUTH_PASSWORD=${MariaDB_DB_PASSWORD}
-      - SPRING_DATASOURCE_DOMAIN_URL=jdbc:postgresql://domain-db:5432/sweetspot_places
-      - SPRING_DATASOURCE_DOMAIN_USERNAME=${Postgre_DB_USER}
-      - SPRING_DATASOURCE_DOMAIN_PASSWORD=${Postgre_DB_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      SPRING_PROFILES_ACTIVE: server
+    env_file: ./.env
+    volumes:
+      - ./output:/app/output
+      - ./csv-data:/app/csv-data
+      - ./logs:/app/logs
     networks:
       - sweetspot-network
 
-  auth-db:
-    image: mariadb:10.8
-    container_name: sweetspot-auth-db
+  # =================================================================
+  #  FRONTEND SERVICES
+  # =================================================================
+  # 5. 관리자용 Frontend (React)
+  admin-client:
+    build:
+      context: ./frontend-admin
+      dockerfile: Dockerfile
+    container_name: sweetspot-admin-client
     restart: always
-    environment:
-      - MARIADB_DATABASE=sweetspot_auth
-      - MARIADB_USER=${MariaDB_DB_USER}
-      - MARIADB_PASSWORD=${MariaDB_DB_PASSWORD}
-      - MARIADB_ROOT_PASSWORD=${MariaDB_DB_ROOT_PASSWORD}
-      - TZ=Asia/Seoul
-    volumes:
-      - ./data/mariadb_data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "5008:5008"
+    environment:
+      - VITE_API_BASE_URL=https://admin.sweetspot.kro.kr/api/admin
     networks:
       - sweetspot-network
 
-  domain-db:
-    image: postgis/postgis:15-3.4
-    container_name: sweetspot-domain-db
-    restart: always
-    environment:
-      - POSTGRES_DB=sweetspot_places
-      - POSTGRES_USER=${Postgre_DB_USER}
-      - POSTGRES_PASSWORD=${Postgre_DB_PASSWORD}
-      - TZ=Asia/Seoul
-    volumes:
-      - ./data/postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - sweetspot-network
-
-  proxy:
-    image: nginx:stable-alpine
-    container_name: sweetspot-proxy
-    restart: always
-    ports:
-      - "80:80"
-    volumes:
-      - ./proxy/nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - backend
-    networks:
-      - sweetspot-network
-  
 networks:
   sweetspot-network:
     driver: bridge
-

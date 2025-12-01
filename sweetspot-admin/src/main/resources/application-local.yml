@@ -1,0 +1,21 @@
+# sweetspot-admin/src/main/resources/application-local.yml
+
+spring:
+  datasources:
+    domain:
+      url: ${SPRING_DATASOURCE_DOMAIN_URL}
+      username: ${SPRING_DATASOURCE_DOMAIN_USERNAME}
+      password: ${SPRING_DATASOURCE_DOMAIN_PASSWORD}
+      driver-class-name: org.postgresql.Driver
+      jpa:
+        properties:
+          hibernate:
+            dialect: org.hibernate.dialect.PostgreSQLDialect
+            hbm2ddl:
+              auto: create-drop
+            show-sql: true
+            format_sql: true
+            jdbc:
+              batch_size: 1000
+            order_inserts: true
+            order_updates: true

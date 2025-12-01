@@ -1,0 +1,13 @@
+dependencies {
+    implementation project(':sweetspot-api')
+    implementation project(':sweetspot-core')
+    testRuntimeOnly 'com.h2database:h2'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    implementation 'org.apache.commons:commons-csv:1.11.0'
+    implementation 'org.locationtech.proj4j:proj4j:1.1.5'
+
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

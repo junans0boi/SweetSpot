@@ -1,0 +1,27 @@
+apply plugin: 'java-library'
+
+dependencies {
+    // 1. JPA & DB
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    api 'org.hibernate.orm:hibernate-spatial:6.4.4.Final' // 좌표 데이터용
+
+    // 2. DB Drivers (MariaDB, PostgreSQL)
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // 3. Security Core (User Details 등 공통 객체용)
+    api 'org.springframework.security:spring-security-core'
+    
+    // 4. Validation & Util
+    api 'org.springframework.boot:spring-boot-starter-validation'
+    api 'org.apache.commons:commons-lang3:3.12.0'
+    
+    // 6. Web & Security (for moved security classes)
+    api 'org.springframework.boot:spring-boot-starter-web'
+    api 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    // 7. JWT
+    api 'io.jsonwebtoken:jjwt-api:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+}
