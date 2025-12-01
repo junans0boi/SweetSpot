@@ -1,0 +1,15 @@
+ubuntu@db-main-kr-01:/etc/nginx$ sudo -u postgres psql -d sweetspot_places
+psql (18.0 (Ubuntu 18.0-1.pgdg24.04+3), server 16.10 (Ubuntu 16.10-0ubuntu0.24.04.1))
+Type "help" for help.
+
+sweetspot_places=# ALTER EXTENSION postgis UPDATE;
+NOTICE:  version "3.6.1" of extension "postgis" is already installed
+ALTER EXTENSION
+sweetspot_places=# SELECT postgis_full_version();
+
+postgis_full_version                                                                                                                                                      
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ POSTGIS="3.6.1 f533623" [EXTENSION] PGSQL="160" GEOS="3.12.1-CAPI-1.18.1" PROJ="9.4.0 NETWORK_ENABLED=OFF URL_ENDPOINT=https://cdn.proj.org USER_WRITABLE_DIRECTORY=/tmp/proj DATABASE_PATH=/usr/share/proj/proj.db" (compiled against PROJ 9.4.0) LIBXML="2.9.14" LIBJSON="0.17" LIBPROTOBUF="1.4.1" WAGYU="0.5.0 (Internal)"
+(1 row)
+
+(END)

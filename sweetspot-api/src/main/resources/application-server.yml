@@ -1,6 +1,22 @@
 server:
   forward-headers-strategy: native
+  tomcat:
+    max-http-form-post-size: 20MB
 
+spring:
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+      
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+gemini:
+  api:
+    key: "${GEMINI_API_KEY}"
 datasources:
   auth:
     driver-class-name: org.mariadb.jdbc.Driver
@@ -26,3 +42,7 @@ datasources:
           dialect: org.hibernate.dialect.PostgreSQLDialect
           hbm2ddl:
             auto: update
+          # Domain DB용 쿼리 로그 활성화
+          show_sql: true
+          format_sql: true
+          highlight_sql: true

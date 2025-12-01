@@ -36,4 +36,20 @@ public class UserService {
 
         return UserInfoResponse.from(user);
     }
+
+
+
+    // ✅ [추가] 프로필 수정 로직
+    @Transactional
+    public UserInfoResponse updateProfile(String email, String newName, String newPictureUrl) {
+        // LOCAL 계정 우선 검색, 없으면 첫 번째 계정
+        User user = userRepository.findByEmailAndProvider(email, Provider.LOCAL)
+                .orElseGet(() -> userRepository.findByEmail(email).stream().findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("사용자 없음")));
+
+        // 정보 업데이트
+        user.updateProfile(newName, newPictureUrl);
+
+        return UserInfoResponse.from(user);
+    }
 }

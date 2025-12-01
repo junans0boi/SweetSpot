@@ -14,7 +14,7 @@
 #4 transferring dockerfile: 909B done
 #4 DONE 0.0s
 
-#5 [admin-server internal] load metadata for docker.io/library/eclipse-temurin:21-jdk-jammy
+#5 [admin-server internal] load metadata for docker.io/library/eclipse-temurin:21-jre-jammy
 #5 ...
 
 #6 [admin-client internal] load metadata for docker.io/library/node:20-alpine
@@ -30,190 +30,122 @@
 #9 [admin-client internal] load build context
 #9 ...
 
-#5 [api-server internal] load metadata for docker.io/library/eclipse-temurin:21-jdk-jammy
-#5 DONE 1.5s
-
-#10 [admin-server internal] load metadata for docker.io/library/eclipse-temurin:21-jre-jammy
+#10 [api-server internal] load metadata for docker.io/library/eclipse-temurin:21-jdk-jammy
 #10 DONE 1.5s
 
-#11 [admin-server internal] load .dockerignore
-#11 transferring context: 376B done
-#11 DONE 0.0s
-
-#12 [api-server builder  1/13] FROM docker.io/library/eclipse-temurin:21-jdk-jammy@sha256:81ad1240d91eeafe1ab4154e9ed2310b67cb966caad1d235232ae10abcb1fae2
-#12 DONE 0.0s
-
-#13 [api-server stage-1 1/3] FROM docker.io/library/eclipse-temurin:21-jre-jammy@sha256:2843f155a9fe5aab6a73a71a9f65c38143e8e929366a1a7787f07c2a89c26887
-#13 DONE 0.0s
+#5 [admin-server internal] load metadata for docker.io/library/eclipse-temurin:21-jre-jammy
+#5 DONE 1.5s
 
 #9 [admin-client internal] load build context
-#9 transferring context: 455.80kB 0.2s done
-#9 DONE 0.3s
+#9 ...
+
+#11 [admin-server internal] load .dockerignore
+#11 transferring context: 376B 0.0s done
+#11 DONE 0.0s
+
+#12 [admin-server stage-1 1/3] FROM docker.io/library/eclipse-temurin:21-jre-jammy@sha256:2843f155a9fe5aab6a73a71a9f65c38143e8e929366a1a7787f07c2a89c26887
+#12 DONE 0.0s
+
+#13 [admin-server builder  1/13] FROM docker.io/library/eclipse-temurin:21-jdk-jammy@sha256:81ad1240d91eeafe1ab4154e9ed2310b67cb966caad1d235232ae10abcb1fae2
+#13 DONE 0.0s
 
 #14 [admin-server internal] load build context
-#14 transferring context: 23.70kB 0.0s done
+#14 transferring context: 14.47kB 0.0s done
 #14 DONE 0.0s
 
-#15 [admin-server builder  3/13] COPY build.gradle settings.gradle /app/
+#9 [admin-client internal] load build context
+#9 transferring context: 464.81kB 0.4s done
+#9 DONE 0.4s
+
+#15 [admin-server builder 13/13] RUN --mount=type=cache,target=/root/.gradle ./gradlew clean :sweetspot-admin:bootJar -x test
 #15 CACHED
 
-#16 [admin-server builder  7/13] COPY sweetspot-api/build.gradle /app/sweetspot-api/
+#16 [admin-server stage-1 3/3] COPY --from=builder /app/sweetspot-admin/build/libs/*.jar app.jar
 #16 CACHED
 
-#17 [admin-server builder  2/13] WORKDIR /app
+#17 [admin-server builder 11/13] COPY sweetspot-admin/src /app/sweetspot-admin/src
 #17 CACHED
 
-#18 [admin-server builder  9/13] COPY sweetspot-core/src /app/sweetspot-core/src
+#18 [admin-server builder 12/13] RUN chmod +x ./gradlew
 #18 CACHED
 
-#19 [admin-server builder  8/13] COPY sweetspot-admin/build.gradle /app/sweetspot-admin/
+#19 [admin-server builder  3/13] COPY build.gradle settings.gradle /app/
 #19 CACHED
 
-#20 [admin-server builder  4/13] COPY gradlew /app/
+#20 [admin-server builder  6/13] COPY sweetspot-core/build.gradle /app/sweetspot-core/
 #20 CACHED
 
-#21 [admin-server builder  6/13] COPY sweetspot-core/build.gradle /app/sweetspot-core/
+#21 [admin-server builder  8/13] COPY sweetspot-admin/build.gradle /app/sweetspot-admin/
 #21 CACHED
 
-#22 [admin-server builder  5/13] COPY gradle /app/gradle/
+#22 [admin-server builder  9/13] COPY sweetspot-core/src /app/sweetspot-core/src
 #22 CACHED
 
-#23 [admin-server builder 10/13] COPY sweetspot-api/src /app/sweetspot-api/src
+#23 [admin-server builder  5/13] COPY gradle /app/gradle/
 #23 CACHED
 
-#24 [admin-client 2/5] WORKDIR /app
+#24 [admin-server builder 10/13] COPY sweetspot-api/src /app/sweetspot-api/src
 #24 CACHED
 
-#25 [admin-client 3/5] COPY package*.json ./
+#25 [admin-server stage-1 2/3] WORKDIR /app
 #25 CACHED
 
-#26 [admin-client 4/5] RUN NODE_ENV=development npm install
+#26 [api-server builder 13/13] RUN --mount=type=cache,target=/root/.gradle ./gradlew clean :sweetspot-api:bootJar -x test
 #26 CACHED
 
-#27 [admin-client 5/5] COPY . .
+#27 [admin-server builder  2/13] WORKDIR /app
 #27 CACHED
 
-#28 [admin-server builder 11/13] COPY sweetspot-admin/src /app/sweetspot-admin/src
-#28 DONE 0.1s
+#28 [admin-server builder  7/13] COPY sweetspot-api/build.gradle /app/sweetspot-api/
+#28 CACHED
 
-#29 [admin-client] exporting to image
-#29 exporting layers done
-#29 writing image sha256:bceaffb8e26f0aaa1097e1000bdacb5a79f108daa81c3fe7ffce5424829150df done
-#29 naming to docker.io/library/sweetspot-admin-client 0.0s done
-#29 DONE 0.0s
+#29 [admin-server builder  4/13] COPY gradlew /app/
+#29 CACHED
 
-#30 [admin-client] resolving provenance for metadata file
-#30 DONE 0.0s
+#30 [api-server stage-1 3/3] COPY --from=builder /app/sweetspot-api/build/libs/*.jar app.jar
+#30 CACHED
 
-#31 [api-server builder 12/13] RUN chmod +x ./gradlew
-#31 DONE 0.2s
+#31 [admin-server] exporting to image
+#31 exporting layers done
+#31 writing image sha256:bb830aaa7dcc929d6245a2bd80be78d852d385947c47bc2ed34bd8c75810a061 done
+#31 naming to docker.io/library/sweetspot-admin-server done
+#31 DONE 0.0s
 
-#32 [api-server builder 13/13] RUN --mount=type=cache,target=/root/.gradle ./gradlew clean :sweetspot-api:bootJar -x test
-#32 2.705 Starting a Gradle Daemon, 2 incompatible and 1 stopped Daemons could not be reused, use --status for details
-#32 ...
+#32 [api-server] exporting to image
+#32 exporting layers done
+#32 writing image sha256:34768d83e269e39ff038e384d44e554f6037a89c544dd7416aa4a2fb223af596 done
+#32 naming to docker.io/library/sweetspot-api-server done
+#32 DONE 0.1s
 
-#33 [admin-server builder 13/13] RUN --mount=type=cache,target=/root/.gradle ./gradlew clean :sweetspot-admin:bootJar -x test
-#33 2.510 Starting a Gradle Daemon, 1 incompatible and 1 stopped Daemons could not be reused, use --status for details
-#33 12.30 > Task :clean UP-TO-DATE
-#33 12.30 > Task :sweetspot-admin:clean UP-TO-DATE
-#33 12.30 > Task :sweetspot-api:clean UP-TO-DATE
-#33 12.30 > Task :sweetspot-core:clean UP-TO-DATE
-#33 16.90 
-#33 16.90 > Task :sweetspot-core:compileJava
-#33 16.91 Note: /app/sweetspot-core/src/main/java/com/hollywood/sweetspot/core/global/security/oauth2/handler/CookieUtils.java uses or overrides a deprecated API.
-#33 16.91 Note: Recompile with -Xlint:deprecation for details.
-#33 16.91 Note: /app/sweetspot-core/src/main/java/com/hollywood/sweetspot/core/global/security/JwtTokenProvider.java uses unchecked or unsafe operations.
-#33 17.00 Note: Recompile with -Xlint:unchecked for details.
-#33 19.80 
-#33 19.80 > Task :sweetspot-api:compileJava
-#33 19.80 > Task :sweetspot-api:processResources
-#33 19.80 > Task :sweetspot-api:classes
-#33 19.90 > Task :sweetspot-api:jar
-#33 22.20 > Task :sweetspot-admin:compileJava
-#33 22.21 > Task :sweetspot-admin:processResources
-#33 22.21 > Task :sweetspot-admin:classes
-#33 22.21 > Task :sweetspot-admin:resolveMainClassName
-#33 22.21 > Task :sweetspot-core:processResources NO-SOURCE
-#33 22.21 > Task :sweetspot-core:classes
-#33 22.30 > Task :sweetspot-core:jar
-#33 23.20 > Task :sweetspot-admin:bootJar
-#33 23.20 
-#33 23.20 [Incubating] Problems report is available at: file:///app/build/reports/problems/problems-report.html
-#33 23.20 
-#33 23.20 Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
-#33 23.20 
-#33 23.20 You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
-#33 23.20 
-#33 23.20 For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
-#33 23.20 
-#33 23.20 BUILD SUCCESSFUL in 22s
-#33 23.20 13 actionable tasks: 9 executed, 4 up-to-date
-#33 DONE 24.0s
+#33 [admin-client 3/5] COPY package*.json ./
+#33 CACHED
 
-#32 [api-server builder 13/13] RUN --mount=type=cache,target=/root/.gradle ./gradlew clean :sweetspot-api:bootJar -x test
-#32 ...
-
-#34 [api-server stage-1 2/3] WORKDIR /app
+#34 [admin-client 2/5] WORKDIR /app
 #34 CACHED
 
-#35 [admin-server stage-1 3/3] COPY --from=builder /app/sweetspot-admin/build/libs/*.jar app.jar
-#35 DONE 0.4s
+#35 [admin-client 4/5] RUN NODE_ENV=development npm install
+#35 CACHED
 
-#32 [api-server builder 13/13] RUN --mount=type=cache,target=/root/.gradle ./gradlew clean :sweetspot-api:bootJar -x test
-#32 ...
-
-#36 [admin-server] exporting to image
-#36 exporting layers 0.1s done
-#36 writing image sha256:db64ff2b81b47856f187e4291de6384af06504528ee8f0e2cb36e7fae7f02d20 done
-#36 naming to docker.io/library/sweetspot-admin-server done
-#36 DONE 0.2s
+#36 [admin-client 5/5] COPY . .
+#36 ...
 
 #37 [admin-server] resolving provenance for metadata file
 #37 DONE 0.0s
 
-#32 [api-server builder 13/13] RUN --mount=type=cache,target=/root/.gradle ./gradlew clean :sweetspot-api:bootJar -x test
-#32 29.80 > Task :clean UP-TO-DATE
-#32 29.80 > Task :sweetspot-admin:clean UP-TO-DATE
-#32 29.80 > Task :sweetspot-api:clean UP-TO-DATE
-#32 29.80 > Task :sweetspot-core:clean UP-TO-DATE
-#32 34.20 
-#32 34.20 > Task :sweetspot-core:compileJava
-#32 34.20 Note: /app/sweetspot-core/src/main/java/com/hollywood/sweetspot/core/global/security/oauth2/handler/CookieUtils.java uses or overrides a deprecated API.
-#32 34.20 Note: Recompile with -Xlint:deprecation for details.
-#32 34.21 Note: /app/sweetspot-core/src/main/java/com/hollywood/sweetspot/core/global/security/JwtTokenProvider.java uses unchecked or unsafe operations.
-#32 34.21 Note: Recompile with -Xlint:unchecked for details.
-#32 36.80 
-#32 36.80 > Task :sweetspot-api:compileJava
-#32 36.90 > Task :sweetspot-api:processResources
-#32 36.90 > Task :sweetspot-api:classes
-#32 36.90 > Task :sweetspot-api:resolveMainClassName
-#32 36.90 > Task :sweetspot-core:processResources NO-SOURCE
-#32 36.90 > Task :sweetspot-core:classes
-#32 37.00 > Task :sweetspot-core:jar
-#32 37.80 > Task :sweetspot-api:bootJar
-#32 37.80 
-#32 37.80 [Incubating] Problems report is available at: file:///app/build/reports/problems/problems-report.html
-#32 37.80 
-#32 37.80 Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
-#32 37.80 
-#32 37.80 You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
-#32 37.80 
-#32 37.80 For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
-#32 37.80 
-#32 37.80 BUILD SUCCESSFUL in 37s
-#32 37.80 10 actionable tasks: 6 executed, 4 up-to-date
-#32 DONE 38.4s
+#38 [api-server] resolving provenance for metadata file
+#38 DONE 0.0s
 
-#38 [api-server stage-1 3/3] COPY --from=builder /app/sweetspot-api/build/libs/*.jar app.jar
-#38 DONE 0.4s
+#36 [admin-client 5/5] COPY . .
+#36 DONE 6.8s
 
-#39 [api-server] exporting to image
-#39 exporting layers 0.1s done
-#39 writing image sha256:5ee50e80ec62bf79ecab3660e98aac80105c86349f8aefd5ecdcb07506d1c10a done
-#39 naming to docker.io/library/sweetspot-api-server done
-#39 DONE 0.1s
+#39 [admin-client] exporting to image
+#39 exporting layers
+#39 exporting layers 0.8s done
+#39 writing image sha256:2e4064fb287789468089a3657f090ef77f8115453adf354266a48484a29f20c4 done
+#39 naming to docker.io/library/sweetspot-admin-client done
+#39 DONE 0.8s
 
-#40 [api-server] resolving provenance for metadata file
+#40 [admin-client] resolving provenance for metadata file
 #40 DONE 0.0s
  sweetspot-admin-client  Built
  sweetspot-admin-server  Built
@@ -230,19 +162,10 @@ sweetspot-admin-client  | > frontend@0.0.0 dev
 sweetspot-admin-client  | > vite --port 5008 --host
 sweetspot-admin-client  | 
 sweetspot-admin-client  | 
-sweetspot-admin-client  |   VITE v7.1.12  ready in 749 ms
+sweetspot-admin-client  |   VITE v7.1.12  ready in 678 ms
 sweetspot-admin-client  | 
 sweetspot-admin-client  |   ➜  Local:   http://localhost:5008/
-sweetspot-admin-client  |   ➜  Network: http://172.18.0.4:5008/
-sweetspot-api           | 
-sweetspot-api           |   .   ____          _            __ _ _
-sweetspot-api           |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
-sweetspot-api           | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
-sweetspot-api           |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
-sweetspot-api           |   '  |____| .__|_| |_|_| |_\__, | / / / /
-sweetspot-api           |  =========|_|==============|___/=/_/_/_/
-sweetspot-api           |  :: Spring Boot ::                (v3.2.4)
-sweetspot-api           | 
+sweetspot-admin-client  |   ➜  Network: http://172.18.0.3:5008/
 sweetspot-admin         | 
 sweetspot-admin         |   .   ____          _            __ _ _
 sweetspot-admin         |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -252,103 +175,102 @@ sweetspot-admin         |   '  |____| .__|_| |_|_| |_\__, | / / / /
 sweetspot-admin         |  =========|_|==============|___/=/_/_/_/
 sweetspot-admin         |  :: Spring Boot ::                (v3.2.4)
 sweetspot-admin         | 
-sweetspot-api           | 2025-11-26T14:36:30.592Z  INFO 1 --- [           main] c.h.sweetspot.SweetspotApplication       : Starting SweetspotApplication v0.0.1-SNAPSHOT using Java 21.0.9 with PID 1 (/app/app.jar started by root in /app)
-sweetspot-api           | 2025-11-26T14:36:30.606Z  INFO 1 --- [           main] c.h.sweetspot.SweetspotApplication       : The following 1 profile is active: "server"
-sweetspot-admin         | 2025-11-26T14:36:30.722Z  INFO 1 --- [           main] c.h.s.SweetspotAdminApplication          : Starting SweetspotAdminApplication v0.0.1-SNAPSHOT using Java 21.0.9 with PID 1 (/app/app.jar started by root in /app)
-sweetspot-admin         | 2025-11-26T14:36:30.727Z  INFO 1 --- [           main] c.h.s.SweetspotAdminApplication          : The following 1 profile is active: "server"
-sweetspot-admin         | 2025-11-26T14:36:32.781Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-sweetspot-admin         | 2025-11-26T14:36:32.868Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 74 ms. Found 2 JPA repository interfaces.
-sweetspot-admin         | 2025-11-26T14:36:32.871Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-sweetspot-admin         | 2025-11-26T14:36:32.881Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 7 ms. Found 1 JPA repository interface.
-sweetspot-api           | 2025-11-26T14:36:33.320Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-sweetspot-api           | 2025-11-26T14:36:33.466Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 123 ms. Found 2 JPA repository interfaces.
-sweetspot-api           | 2025-11-26T14:36:33.471Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-sweetspot-api           | 2025-11-26T14:36:33.483Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 11 ms. Found 1 JPA repository interface.
-sweetspot-admin         | 2025-11-26T14:36:35.173Z  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 5007 (http)
-sweetspot-admin         | 2025-11-26T14:36:35.211Z  INFO 1 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-sweetspot-admin         | 2025-11-26T14:36:35.220Z  INFO 1 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
-sweetspot-admin         | 2025-11-26T14:36:35.345Z  INFO 1 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-sweetspot-admin         | 2025-11-26T14:36:35.348Z  INFO 1 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4469 ms
-sweetspot-api           | 2025-11-26T14:36:35.516Z  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 5005 (http)
-sweetspot-api           | 2025-11-26T14:36:35.549Z  INFO 1 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-sweetspot-api           | 2025-11-26T14:36:35.550Z  INFO 1 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
-sweetspot-api           | 2025-11-26T14:36:35.640Z  INFO 1 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-sweetspot-api           | 2025-11-26T14:36:35.644Z  INFO 1 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4755 ms
-sweetspot-admin         | 2025-11-26T14:36:35.836Z  INFO 1 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: domain]
-sweetspot-api           | 2025-11-26T14:36:36.041Z  INFO 1 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: domain]
-sweetspot-admin         | 2025-11-26T14:36:36.050Z  INFO 1 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
-sweetspot-admin         | 2025-11-26T14:36:36.073Z  INFO 1 --- [           main] o.h.spatial.integration.SpatialService   : HHH80000001: hibernate-spatial integration enabled : true
-sweetspot-admin         | 2025-11-26T14:36:36.181Z  INFO 1 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-sweetspot-api           | 2025-11-26T14:36:36.236Z  INFO 1 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
-sweetspot-api           | 2025-11-26T14:36:36.253Z  INFO 1 --- [           main] o.h.spatial.integration.SpatialService   : HHH80000001: hibernate-spatial integration enabled : true
-sweetspot-api           | 2025-11-26T14:36:36.306Z  INFO 1 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-sweetspot-admin         | 2025-11-26T14:36:36.474Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-sweetspot-api           | 2025-11-26T14:36:36.710Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-sweetspot-admin         | 2025-11-26T14:36:37.407Z  INFO 1 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4b5ad306
-sweetspot-admin         | 2025-11-26T14:36:37.410Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-sweetspot-admin         | 2025-11-26T14:36:37.496Z  WARN 1 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-sweetspot-api           | 2025-11-26T14:36:37.575Z  INFO 1 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4586a8aa
-sweetspot-api           | 2025-11-26T14:36:37.580Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-sweetspot-admin         | 2025-11-26T14:36:37.620Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.postgis.PostgisDialectContributor
-sweetspot-api           | 2025-11-26T14:36:37.667Z  WARN 1 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-sweetspot-api           | 2025-11-26T14:36:37.804Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.postgis.PostgisDialectContributor
-sweetspot-admin         | 2025-11-26T14:36:38.532Z  INFO 1 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-sweetspot-admin         | 2025-11-26T14:36:38.587Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.postgis.PostgisDialectContributor
-sweetspot-api           | 2025-11-26T14:36:38.672Z  INFO 1 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-sweetspot-api           | 2025-11-26T14:36:38.736Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.postgis.PostgisDialectContributor
-sweetspot-admin         | 2025-11-26T14:36:39.236Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000004: hibernate-spatial adding function contributions from : org.hibernate.spatial.dialect.postgis.PostgisDialectContributor
-sweetspot-api           | 2025-11-26T14:36:40.426Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000004: hibernate-spatial adding function contributions from : org.hibernate.spatial.dialect.postgis.PostgisDialectContributor
-sweetspot-admin         | 2025-11-26T14:36:40.686Z  INFO 1 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-sweetspot-admin         | 2025-11-26T14:36:40.907Z  INFO 1 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'domain'
-sweetspot-admin         | 2025-11-26T14:36:40.962Z  INFO 1 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: auth]
-sweetspot-admin         | 2025-11-26T14:36:40.973Z  INFO 1 --- [           main] o.h.spatial.integration.SpatialService   : HHH80000001: hibernate-spatial integration enabled : true
-sweetspot-admin         | 2025-11-26T14:36:40.977Z  INFO 1 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-sweetspot-admin         | 2025-11-26T14:36:40.993Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
-sweetspot-admin         | 2025-11-26T14:36:41.200Z  INFO 1 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.mariadb.jdbc.Connection@2eb31735
-sweetspot-admin         | 2025-11-26T14:36:41.200Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
-sweetspot-admin         | 2025-11-26T14:36:41.215Z  WARN 1 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: MariaDBDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-sweetspot-admin         | 2025-11-26T14:36:41.222Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.mariadb.MariaDBDialectContributor
-sweetspot-admin         | 2025-11-26T14:36:41.268Z  INFO 1 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-sweetspot-admin         | 2025-11-26T14:36:41.281Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.mariadb.MariaDBDialectContributor
-sweetspot-admin         | 2025-11-26T14:36:41.351Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000004: hibernate-spatial adding function contributions from : org.hibernate.spatial.dialect.mariadb.MariaDBDialectContributor
-sweetspot-admin         | 2025-11-26T14:36:41.454Z  INFO 1 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-sweetspot-admin         | 2025-11-26T14:36:41.496Z  INFO 1 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'auth'
-sweetspot-api           | 2025-11-26T14:36:42.267Z  INFO 1 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-sweetspot-admin         | 2025-11-26T14:36:42.330Z  INFO 1 --- [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-sweetspot-api           | 2025-11-26T14:36:42.437Z  INFO 1 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'domain'
-sweetspot-api           | 2025-11-26T14:36:42.461Z  INFO 1 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: auth]
-sweetspot-api           | 2025-11-26T14:36:42.466Z  INFO 1 --- [           main] o.h.spatial.integration.SpatialService   : HHH80000001: hibernate-spatial integration enabled : true
-sweetspot-api           | 2025-11-26T14:36:42.468Z  INFO 1 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-sweetspot-api           | 2025-11-26T14:36:42.478Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
-sweetspot-api           | 2025-11-26T14:36:42.562Z  INFO 1 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.mariadb.jdbc.Connection@71db6703
-sweetspot-api           | 2025-11-26T14:36:42.563Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
-sweetspot-api           | 2025-11-26T14:36:42.569Z  WARN 1 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: MariaDBDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-sweetspot-api           | 2025-11-26T14:36:42.572Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.mariadb.MariaDBDialectContributor
-sweetspot-api           | 2025-11-26T14:36:42.628Z  INFO 1 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-sweetspot-api           | 2025-11-26T14:36:42.637Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.mariadb.MariaDBDialectContributor
-sweetspot-api           | 2025-11-26T14:36:42.700Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000004: hibernate-spatial adding function contributions from : org.hibernate.spatial.dialect.mariadb.MariaDBDialectContributor
-sweetspot-api           | 2025-11-26T14:36:42.814Z  INFO 1 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-sweetspot-api           | 2025-11-26T14:36:42.865Z  INFO 1 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'auth'
-sweetspot-api           | 2025-11-26T14:36:44.004Z  INFO 1 --- [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-sweetspot-admin         | 2025-11-26T14:36:45.356Z  INFO 1 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@b4f7e1c, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@6258ea84, org.springframework.security.web.context.SecurityContextHolderFilter@20f1e26, org.springframework.security.web.header.HeaderWriterFilter@4bbc9862, org.springframework.web.filter.CorsFilter@6c720765, org.springframework.security.web.authentication.logout.LogoutFilter@73c71083, com.hollywood.sweetspot.core.global.security.JwtAuthenticationFilter@47acd13b, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@75c90ec5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@35ff7336, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@6a275836, org.springframework.security.web.session.SessionManagementFilter@7fec198a, org.springframework.security.web.access.ExceptionTranslationFilter@751df26c, org.springframework.security.web.access.intercept.AuthorizationFilter@5c26ab0a]
-sweetspot-admin         | 2025-11-26T14:36:46.030Z  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 5007 (http) with context path ''
-sweetspot-admin         | 2025-11-26T14:36:46.063Z  INFO 1 --- [           main] c.h.s.SweetspotAdminApplication          : Started SweetspotAdminApplication in 17.052 seconds (process running for 19.378)
-sweetspot-api           | 2025-11-26T14:36:46.762Z  INFO 1 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@295d8b70, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@2f42f20f, org.springframework.security.web.context.SecurityContextHolderFilter@6dd729, org.springframework.security.web.header.HeaderWriterFilter@6c3600b7, org.springframework.web.filter.CorsFilter@7ee46aaf, org.springframework.security.web.authentication.logout.LogoutFilter@4e2bed0f, org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter@40406a3f, org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter@2174fda1, com.hollywood.sweetspot.core.global.security.JwtAuthenticationFilter@58ae402b, org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter@12ce9299, org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter@1e072d67, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@7ee45cbe, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@5634f627, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5b4433dc, org.springframework.security.web.session.SessionManagementFilter@3c995eae, org.springframework.security.web.access.ExceptionTranslationFilter@689afbb0, org.springframework.security.web.access.intercept.AuthorizationFilter@2d0ea3a9]
-sweetspot-api           | 2025-11-26T14:36:47.169Z  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 5005 (http) with context path ''
-sweetspot-api           | 2025-11-26T14:36:47.184Z  INFO 1 --- [           main] c.h.sweetspot.SweetspotApplication       : Started SweetspotApplication in 18.212 seconds (process running for 20.538)
-sweetspot-admin         | 2025-11-26T14:40:51.541Z  INFO 1 --- [nio-5007-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-sweetspot-admin         | 2025-11-26T14:40:51.542Z  INFO 1 --- [nio-5007-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-sweetspot-admin         | 2025-11-26T14:40:51.544Z  INFO 1 --- [nio-5007-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
-sweetspot-api           | 2025-11-26T16:03:40.877Z  INFO 1 --- [nio-5005-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-sweetspot-api           | 2025-11-26T16:03:40.878Z  INFO 1 --- [nio-5005-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-sweetspot-api           | 2025-11-26T16:03:40.880Z  INFO 1 --- [nio-5005-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-sweetspot-admin-client  | Files in the public directory are served at the root path.
-sweetspot-admin-client  | Instead of /public/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php, use /vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php.
-sweetspot-admin-client  | Files in the public directory are served at the root path.
-sweetspot-admin-client  | Instead of /public/index.php?s=/index/\think\app/invokefunction&function=call_user_func_array&vars[0]=md5&vars[1][]=Hello, use /index.php?s=/index/\think\app/invokefunction&function=call_user_func_array&vars[0]=md5&vars[1][]=Hello.
-sweetspot-admin-client  | The request id "/etc/passwd" is outside of Vite serving allow list.
-sweetspot-admin-client  | 
-sweetspot-admin-client  | - /app
-sweetspot-admin-client  | 
-sweetspot-admin-client  | Refer to docs https://vite.dev/config/server-options.html#server-fs-allow for configurations and more details.
-sweetspot-admin-client  | 
+sweetspot-admin         | 2025-12-01T03:34:52.389Z  INFO 1 --- [           main] c.h.s.SweetspotAdminApplication          : Starting SweetspotAdminApplication v0.0.1-SNAPSHOT using Java 21.0.9 with PID 1 (/app/app.jar started by root in /app)
+sweetspot-admin         | 2025-12-01T03:34:52.400Z  INFO 1 --- [           main] c.h.s.SweetspotAdminApplication          : The following 1 profile is active: "server"
+sweetspot-api           | 
+sweetspot-api           |   .   ____          _            __ _ _
+sweetspot-api           |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+sweetspot-api           | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+sweetspot-api           |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+sweetspot-api           |   '  |____| .__|_| |_|_| |_\__, | / / / /
+sweetspot-api           |  =========|_|==============|___/=/_/_/_/
+sweetspot-api           |  :: Spring Boot ::                (v3.2.4)
+sweetspot-api           | 
+sweetspot-api           | 2025-12-01T03:34:53.001Z  INFO 1 --- [           main] c.h.sweetspot.SweetspotApplication       : Starting SweetspotApplication v0.0.1-SNAPSHOT using Java 21.0.9 with PID 1 (/app/app.jar started by root in /app)
+sweetspot-api           | 2025-12-01T03:34:53.009Z  INFO 1 --- [           main] c.h.sweetspot.SweetspotApplication       : The following 1 profile is active: "server"
+sweetspot-admin         | 2025-12-01T03:34:54.861Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+sweetspot-admin         | 2025-12-01T03:34:55.016Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 133 ms. Found 3 JPA repository interfaces.
+sweetspot-admin         | 2025-12-01T03:34:55.021Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+sweetspot-admin         | 2025-12-01T03:34:55.035Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 13 ms. Found 1 JPA repository interface.
+sweetspot-api           | 2025-12-01T03:34:55.377Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+sweetspot-api           | 2025-12-01T03:34:55.457Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 71 ms. Found 3 JPA repository interfaces.
+sweetspot-api           | 2025-12-01T03:34:55.459Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+sweetspot-api           | 2025-12-01T03:34:55.466Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 6 ms. Found 1 JPA repository interface.
+sweetspot-admin         | 2025-12-01T03:34:57.193Z  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 5007 (http)
+sweetspot-admin         | 2025-12-01T03:34:57.228Z  INFO 1 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+sweetspot-admin         | 2025-12-01T03:34:57.232Z  INFO 1 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+sweetspot-admin         | 2025-12-01T03:34:57.322Z  INFO 1 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+sweetspot-admin         | 2025-12-01T03:34:57.326Z  INFO 1 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4667 ms
+sweetspot-api           | 2025-12-01T03:34:57.628Z  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 5005 (http)
+sweetspot-api           | 2025-12-01T03:34:57.653Z  INFO 1 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+sweetspot-api           | 2025-12-01T03:34:57.654Z  INFO 1 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+sweetspot-api           | 2025-12-01T03:34:57.731Z  INFO 1 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+sweetspot-api           | 2025-12-01T03:34:57.733Z  INFO 1 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4533 ms
+sweetspot-admin         | 2025-12-01T03:34:57.805Z  INFO 1 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: domain]
+sweetspot-admin         | 2025-12-01T03:34:57.953Z  INFO 1 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+sweetspot-admin         | 2025-12-01T03:34:57.968Z  INFO 1 --- [           main] o.h.spatial.integration.SpatialService   : HHH80000001: hibernate-spatial integration enabled : true
+sweetspot-admin         | 2025-12-01T03:34:58.170Z  INFO 1 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+sweetspot-api           | 2025-12-01T03:34:58.225Z  INFO 1 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: domain]
+sweetspot-admin         | 2025-12-01T03:34:58.710Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+sweetspot-api           | 2025-12-01T03:34:58.782Z  INFO 1 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+sweetspot-api           | 2025-12-01T03:34:58.831Z  INFO 1 --- [           main] o.h.spatial.integration.SpatialService   : HHH80000001: hibernate-spatial integration enabled : true
+sweetspot-api           | 2025-12-01T03:34:59.030Z  INFO 1 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+sweetspot-api           | 2025-12-01T03:34:59.848Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+sweetspot-admin         | 2025-12-01T03:35:00.574Z  INFO 1 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@368424db
+sweetspot-admin         | 2025-12-01T03:35:00.582Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+sweetspot-admin         | 2025-12-01T03:35:00.931Z  WARN 1 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+sweetspot-api           | 2025-12-01T03:35:01.047Z  INFO 1 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@fcf9525
+sweetspot-api           | 2025-12-01T03:35:01.052Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+sweetspot-admin         | 2025-12-01T03:35:01.112Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.postgis.PostgisDialectContributor
+sweetspot-api           | 2025-12-01T03:35:01.139Z  WARN 1 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+sweetspot-api           | 2025-12-01T03:35:01.489Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.postgis.PostgisDialectContributor
+sweetspot-admin         | 2025-12-01T03:35:02.170Z  INFO 1 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+sweetspot-admin         | 2025-12-01T03:35:02.205Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.postgis.PostgisDialectContributor
+sweetspot-api           | 2025-12-01T03:35:02.309Z  INFO 1 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+sweetspot-api           | 2025-12-01T03:35:02.353Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.postgis.PostgisDialectContributor
+sweetspot-admin         | 2025-12-01T03:35:02.990Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000004: hibernate-spatial adding function contributions from : org.hibernate.spatial.dialect.postgis.PostgisDialectContributor
+sweetspot-api           | 2025-12-01T03:35:03.164Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000004: hibernate-spatial adding function contributions from : org.hibernate.spatial.dialect.postgis.PostgisDialectContributor
+sweetspot-admin         | 2025-12-01T03:35:04.236Z  INFO 1 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+sweetspot-api           | 2025-12-01T03:35:04.523Z  INFO 1 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+sweetspot-admin         | 2025-12-01T03:35:04.528Z  INFO 1 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'domain'
+sweetspot-admin         | 2025-12-01T03:35:04.585Z  INFO 1 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: auth]
+sweetspot-admin         | 2025-12-01T03:35:04.593Z  INFO 1 --- [           main] o.h.spatial.integration.SpatialService   : HHH80000001: hibernate-spatial integration enabled : true
+sweetspot-admin         | 2025-12-01T03:35:04.615Z  INFO 1 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+sweetspot-admin         | 2025-12-01T03:35:04.629Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+sweetspot-admin         | 2025-12-01T03:35:04.792Z  INFO 1 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.mariadb.jdbc.Connection@3b7b099b
+sweetspot-api           | 2025-12-01T03:35:04.794Z  INFO 1 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'domain'
+sweetspot-admin         | 2025-12-01T03:35:04.796Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+sweetspot-admin         | 2025-12-01T03:35:04.817Z  WARN 1 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: MariaDBDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+sweetspot-admin         | 2025-12-01T03:35:04.821Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.mysql.MySQLDialectContributor
+sweetspot-api           | 2025-12-01T03:35:04.869Z  INFO 1 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: auth]
+sweetspot-api           | 2025-12-01T03:35:04.880Z  INFO 1 --- [           main] o.h.spatial.integration.SpatialService   : HHH80000001: hibernate-spatial integration enabled : true
+sweetspot-api           | 2025-12-01T03:35:04.887Z  INFO 1 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+sweetspot-admin         | 2025-12-01T03:35:04.888Z  INFO 1 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+sweetspot-api           | 2025-12-01T03:35:04.902Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+sweetspot-admin         | 2025-12-01T03:35:04.903Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.mysql.MySQLDialectContributor
+sweetspot-admin         | 2025-12-01T03:35:04.985Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000004: hibernate-spatial adding function contributions from : org.hibernate.spatial.dialect.mysql.MySQLDialectContributor
+sweetspot-admin         | 2025-12-01T03:35:05.088Z  INFO 1 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+sweetspot-admin         | 2025-12-01T03:35:05.129Z  INFO 1 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'auth'
+sweetspot-api           | 2025-12-01T03:35:05.180Z  INFO 1 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.mariadb.jdbc.Connection@7fa2473a
+sweetspot-api           | 2025-12-01T03:35:05.181Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+sweetspot-api           | 2025-12-01T03:35:05.200Z  WARN 1 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: MariaDBDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+sweetspot-api           | 2025-12-01T03:35:05.209Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.mariadb.MariaDBDialectContributor
+sweetspot-api           | 2025-12-01T03:35:05.258Z  INFO 1 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+sweetspot-api           | 2025-12-01T03:35:05.272Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000003: hibernate-spatial adding type contributions from : org.hibernate.spatial.dialect.mariadb.MariaDBDialectContributor
+sweetspot-api           | 2025-12-01T03:35:05.428Z  INFO 1 --- [           main] org.hibernate.spatial                    : HHH80000004: hibernate-spatial adding function contributions from : org.hibernate.spatial.dialect.mariadb.MariaDBDialectContributor
+sweetspot-api           | 2025-12-01T03:35:05.532Z  INFO 1 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+sweetspot-api           | 2025-12-01T03:35:05.634Z  INFO 1 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'auth'
+sweetspot-admin         | 2025-12-01T03:35:05.970Z  INFO 1 --- [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+sweetspot-api           | 2025-12-01T03:35:06.653Z  INFO 1 --- [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+sweetspot-admin         | 2025-12-01T03:35:08.690Z  INFO 1 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@6aa909cb, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@4be75a68, org.springframework.security.web.context.SecurityContextHolderFilter@1263422a, org.springframework.security.web.header.HeaderWriterFilter@1f799f4c, org.springframework.web.filter.CorsFilter@747d1e03, org.springframework.security.web.authentication.logout.LogoutFilter@72bb0640, com.hollywood.sweetspot.core.global.security.JwtAuthenticationFilter@70029d2d, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1f79536b, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@6068e9d9, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@2f4ffb35, org.springframework.security.web.session.SessionManagementFilter@ac51234, org.springframework.security.web.access.ExceptionTranslationFilter@2a64c8c3, org.springframework.security.web.access.intercept.AuthorizationFilter@292109c7]
+sweetspot-api           | 2025-12-01T03:35:08.954Z  INFO 1 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@5d08bc22, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@2b3ba0a8, org.springframework.security.web.context.SecurityContextHolderFilter@613d4fa6, org.springframework.security.web.header.HeaderWriterFilter@4dc24d88, org.springframework.web.filter.CorsFilter@43ec41d7, org.springframework.security.web.authentication.logout.LogoutFilter@39caf68a, org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter@1923a29a, org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter@66121af9, com.hollywood.sweetspot.core.global.security.JwtAuthenticationFilter@3a00b15d, org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter@34692767, org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter@77480751, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@2033fd39, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@1f41742f, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@6fb94c36, org.springframework.security.web.session.SessionManagementFilter@1e364cea, org.springframework.security.web.access.ExceptionTranslationFilter@11ae5497, org.springframework.security.web.access.intercept.AuthorizationFilter@6573b345]
+sweetspot-api           | 2025-12-01T03:35:09.693Z  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 5005 (http) with context path ''
+sweetspot-api           | 2025-12-01T03:35:09.717Z  INFO 1 --- [           main] c.h.sweetspot.SweetspotApplication       : Started SweetspotApplication in 18.331 seconds (process running for 20.71)
+sweetspot-admin         | 2025-12-01T03:35:09.779Z  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 5007 (http) with context path ''
+sweetspot-admin         | 2025-12-01T03:35:09.795Z  INFO 1 --- [           main] c.h.s.SweetspotAdminApplication          : Started SweetspotAdminApplication in 19.501 seconds (process running for 20.899)
+sweetspot-admin         | 2025-12-01T03:35:26.619Z  INFO 1 --- [nio-5007-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+sweetspot-admin         | 2025-12-01T03:35:26.619Z  INFO 1 --- [nio-5007-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+sweetspot-admin         | 2025-12-01T03:35:26.621Z  INFO 1 --- [nio-5007-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+sweetspot-api           | 2025-12-01T04:54:36.815Z  INFO 1 --- [nio-5005-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+sweetspot-api           | 2025-12-01T04:54:36.815Z  INFO 1 --- [nio-5005-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+sweetspot-api           | 2025-12-01T04:54:36.818Z  INFO 1 --- [nio-5005-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms

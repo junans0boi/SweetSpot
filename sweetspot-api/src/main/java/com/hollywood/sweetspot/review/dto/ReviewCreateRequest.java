@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -27,4 +28,15 @@ public class ReviewCreateRequest {
 
     // 이미지 URL 리스트 (프론트엔드에서 이미지를 업로드하고 받은 URL들을 전송)
     private List<String> photoUrls;
+    // ✅ [추가] 태그 리스트
+    private List<String> tags; 
+
+    @Builder
+    public ReviewCreateRequest(Long placeId, Integer rating, String text, List<String> photoUrls, List<String> tags) {
+        this.placeId = placeId;
+        this.rating = rating;
+        this.text = text;
+        this.photoUrls = photoUrls;
+        this.tags = tags;
+    }
 }

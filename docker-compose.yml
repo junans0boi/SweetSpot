@@ -16,6 +16,9 @@ services:
     env_file: ./.env
     networks:
       - sweetspot-network
+    volumes:
+      # 호스트의 uploads 폴더를 컨테이너의 /app/uploads 와 연결
+      - ./uploads:/app/uploads
 
   # 4. 관리자용 Admin 서버 (Backend)
   admin-server:
